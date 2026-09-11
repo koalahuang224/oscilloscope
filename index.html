@@ -2,85 +2,407 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>波速與波長教學儀器 (Pro Oscilloscope)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>波動物理演示系統 10.0 完美版</title>
+    <!-- 100% Native Self-Contained CSS: Zero external CDN dependencies, 100% offline-ready -->
     <style>
-        body {
-            background-color: #0f172a; /* slate-900 */
-            color: #e2e8f0; /* slate-200 */
-            font-family: 'Segoe UI', system-ui, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        .dashboard {
+        html, body {
             width: 100%;
-            max-width: 1400px;
-            background-color: #1e293b; /* slate-800 */
-            border: 1px solid #334155; /* slate-700 */
-            border-radius: 10px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            overflow: hidden;
-            padding: 16px;
-            margin: 16px;
-        }
-        .screen-container {
-            background-color: #020617; /* slate-950 */
-            border: 2px solid #475569; /* slate-600 */
-            border-radius: 6px;
-            box-shadow: inset 0 0 40px rgba(0,0,0,0.9), 0 0 15px rgba(0,0,0,0.4);
-            position: relative;
-            padding: 4px;
-            overflow: hidden;
             height: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0b1120;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            touch-action: manipulation;
+        }
+
+        /* App Main Shell */
+        .app-container {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            max-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding: 6px 10px;
+            gap: 6px;
+            background-color: #1e293b;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            height: 22px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            padding-bottom: 2px;
+        }
+        .header-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.9); }
+        }
+        .badge-version {
+            font-size: 10px;
+            color: #fbbf24;
+            font-family: monospace;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            padding: 1px 4px;
+            border-radius: 3px;
+            background-color: rgba(69, 26, 3, 0.4);
+        }
+        .header-status {
+            font-size: 10px;
+            font-family: monospace;
+            color: #34d399;
+            opacity: 0.7;
+        }
+
+        /* Middle Main Workspace: STRICT ROW */
+        .main-workspace {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            width: 100%;
+        }
+
+        /* Screen Container */
+        .screen-container {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            background-color: #020617;
+            border: 2px solid #475569;
+            border-radius: 6px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: none;
         }
         canvas {
             display: block;
-            border-radius: 3px;
+            border-radius: 4px;
             background: #020617;
-            cursor: crosshair;
         }
-        .control-group {
-            background-color: #0f172a; /* slate-900 */
+
+        /* Overlays */
+        .overlay-ch-labels {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            color: #34d399;
+            font-family: monospace;
+            font-size: 10px;
+            opacity: 0.85;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .ch1-text { color: #60a5fa; }
+        .ch2-text { color: #10b981; }
+
+        .overlay-legend {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            font-family: monospace;
+            font-size: 9px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background-color: rgba(15, 23, 42, 0.9);
+            padding: 5px 8px;
+            border-radius: 5px;
             border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .info-panel {
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #020617;
+        .legend-up { color: #fbbf24; }
+        .legend-down { color: #e879f9; }
+        .legend-tip { font-size: 8px; color: #22d3ee; margin-top: 2px; }
+
+        .overlay-unit-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 12px;
+            pointer-events: none;
+            background-color: rgba(2, 6, 23, 0.95);
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(6, 182, 212, 0.6);
+            box-shadow: 0 0 14px rgba(6, 182, 212, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .unit-badge-width {
+            color: #67e8f9;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .unit-badge-time {
+            color: #fcd34d;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 11px;
+            letter-spacing: 0.03em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .dot-cyan {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #22d3ee;
+            box-shadow: 0 0 6px #22d3ee;
+        }
+        .dot-amber {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #fbbf24;
+        }
+
+        /* Right Sidebar Controls */
+        .sidebar-controls {
+            width: 235px;
+            flex-shrink: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        /* Control Cards */
+        .control-group {
+            background-color: #0f172a;
             border: 1px solid #334155;
             border-radius: 6px;
-            padding: 10px;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            padding: 6px 9px;
         }
+        .control-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            padding-bottom: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+        .badge-running {
+            font-size: 9px;
+            font-family: monospace;
+            background-color: #1e3a8a;
+            color: #60a5fa;
+            padding: 1px 4px;
+            border-radius: 3px;
+            border: 1px solid #1d4ed8;
+        }
+        .badge-paused {
+            font-size: 9px;
+            font-family: monospace;
+            background-color: #78350f;
+            color: #fbbf24;
+            padding: 1px 4px;
+            border-radius: 3px;
+            border: 1px solid #b45309;
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+        }
+        .btn:active {
+            transform: scale(0.97);
+        }
+        .btn-blue {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+        }
+        .btn-blue:hover {
+            background-color: #3b82f6;
+        }
+        .btn-emerald {
+            background-color: #059669;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+        }
+        .btn-emerald:hover {
+            background-color: #10b981;
+        }
+        .btn-secondary {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            color: #94a3b8;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+        .btn-secondary:hover {
+            background-color: #334155;
+            color: #e2e8f0;
+        }
+        .btn-active-vectors {
+            background-color: #d97706 !important;
+            color: #ffffff !important;
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5) !important;
+        }
+
+        /* Switch */
+        .switch-label {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .switch-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-track {
+            width: 26px;
+            height: 14px;
+            background-color: #334155;
+            border-radius: 9999px;
+            position: relative;
+            transition: background-color 0.2s;
+        }
+        .switch-track::after {
+            content: '';
+            position: absolute;
+            top: 1.5px;
+            left: 1.5px;
+            width: 11px;
+            height: 11px;
+            background-color: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .switch-input:checked + .switch-track {
+            background-color: #3b82f6;
+        }
+        .switch-input:checked + .switch-track::after {
+            transform: translateX(12px);
+        }
+
         /* Sliders */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .slider-label {
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+        .slider-val {
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .val-emerald { color: #34d399; }
+        .val-amber { color: #fbbf24; }
+        .val-blue { color: #60a5fa; }
+        .val-pink { color: #f472b6; }
+
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: #64748b;
+        }
+
+        /* Range input styling */
         input[type=range] {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             background: transparent;
+            cursor: pointer;
+            margin: 2px 0;
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
+            appearance: none;
+            height: 14px;
+            width: 14px;
             border-radius: 50%;
-            background: #3b82f6; /* blue-500 */
+            background: #3b82f6;
             cursor: pointer;
-            margin-top: -7px;
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+            margin-top: -5px;
+            box-shadow: 0 0 6px rgba(59, 130, 246, 0.8);
             border: 2px solid #fff;
             transition: transform 0.1s;
         }
         input[type=range]:active::-webkit-slider-thumb {
-            transform: scale(1.1);
+            transform: scale(1.2);
         }
         input[type=range]:disabled::-webkit-slider-thumb {
             background: #64748b;
@@ -91,147 +413,259 @@
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 4px;
-            cursor: pointer;
             background: #475569;
             border-radius: 2px;
         }
-        .btn {
-            transition: all 0.2s ease;
+
+        /* Monitor Panel */
+        .monitor-card {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .btn:active {
-            transform: scale(0.97);
+        .info-panel {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #020617;
+            border: 1px solid #334155;
+            border-radius: 5px;
+            padding: 5px 7px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            flex: 1;
+            gap: 2px;
+        }
+        .formula-title {
+            font-size: 9px;
+            color: #94a3b8;
+        }
+        .formula-box {
+            font-weight: bold;
+            font-size: 12px;
+            color: #ffffff;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f172a;
+            padding: 2px 0;
+            border-radius: 4px;
+            border: 1px solid rgba(51, 65, 85, 0.7);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .equation-calc {
+            text-align: center;
+            font-family: monospace;
+            font-size: 10px;
+            background-color: rgba(15, 23, 42, 0.4);
+            padding: 1px 0;
+            border-radius: 3px;
+        }
+        .divider {
+            height: 1px;
+            background-color: #334155;
+            margin: 1px 0;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2px;
+            font-size: 10px;
+        }
+        .stat-label { color: #94a3b8; }
+        .stat-val { font-weight: bold; }
+
+        /* Bottom Parameter Bar: STRICT 3 COLUMNS */
+        .bottom-panel {
+            flex-shrink: 0;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 4px 10px 5px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .bottom-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+            padding-bottom: 2px;
+        }
+        .bottom-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .bottom-subtitle {
+            font-size: 8px;
+            color: #64748b;
+            font-family: monospace;
+        }
+        .parameters-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            padding: 0 2px;
+        }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <!-- Compact Header -->
-        <div class="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
-            <h1 class="text-base md:text-lg font-bold text-slate-200 tracking-wide flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse box-shadow-glow"></span>
-                波動物理演示系統
-                <span class="text-[10px] text-amber-400 font-mono ml-2 border border-amber-600/50 px-1.5 py-0.5 rounded tracking-normal bg-amber-900/30">10.0 完美版</span>
-            </h1>
-            <div class="text-[10px] font-mono text-emerald-500 opacity-60">
+    <div class="app-container" id="appContainer">
+        <!-- 1. Header (Fixed Height ~22px) -->
+        <div class="app-header">
+            <div class="header-title">
+                <span class="pulse-dot"></span>
+                <span>波動物理演示系統</span>
+                <span class="badge-version">10.0 完美鎖定版</span>
+            </div>
+            <div class="header-status">
                 <span id="sysTime">SYS.READY</span>
             </div>
         </div>
 
-        <!-- Main Workspace: Canvas (Left) + Sidebar (Right) -->
-        <div class="flex flex-col lg:flex-row gap-4 mb-4">
+        <!-- 2. Middle Main Workspace (Canvas + Sidebar: STRICT ROW) -->
+        <div class="main-workspace">
             
             <!-- Left Side: Oscilloscope Screen -->
-            <div class="flex-grow flex flex-col min-w-0">
-                <div class="screen-container" id="screenContainer">
-                    <canvas id="waveCanvas" title="點擊畫面可播放 / 暫停"></canvas>
-                    
-                    <!-- Fixed Overlays on Canvas -->
-                    <div class="absolute top-3 left-3 text-emerald-400 font-mono text-[10px] opacity-80 pointer-events-none flex flex-col gap-0.5">
-                        <div>CH1 <span class="text-blue-400">■ 原波形 (MAIN)</span></div>
-                        <div id="ch2Label" class="opacity-0 transition-opacity">CH2 <span class="text-emerald-500">■ 位移後波 (SHIFT)</span></div>
-                    </div>
-                    
-                    <div id="legendVectors" class="absolute top-12 left-3 text-[10px] font-mono opacity-0 transition-opacity pointer-events-none flex flex-col gap-0.5 items-start bg-slate-900/80 p-1.5 rounded border border-slate-700">
-                        <div class="text-slate-400 mb-0.5">運動方向</div>
-                        <div><span class="text-amber-400">▲</span> 向上</div>
-                        <div><span class="text-fuchsia-400">▼</span> 向下</div>
-                    </div>
+            <div class="screen-container" id="screenContainer">
+                <canvas id="waveCanvas"></canvas>
+                
+                <!-- Fixed Overlays on Canvas -->
+                <div class="overlay-ch-labels">
+                    <div>CH1 <span class="ch1-text">■ 原波形 (MAIN)</span></div>
+                    <div id="ch2Label" style="opacity: 0; transition: opacity 0.2s;">CH2 <span class="ch2-text">■ 位移後波 (SHIFT)</span></div>
+                </div>
+                
+                <div id="legendVectors" class="overlay-legend">
+                    <div style="color: #cbd5e1; font-weight: bold;">質點運動方向</div>
+                    <div><span class="legend-up">▲</span> 向上運動</div>
+                    <div><span class="legend-down">▼</span> 向下運動</div>
+                    <div class="legend-tip">💡 點選紅點切換標示</div>
+                </div>
 
-                    <div class="absolute bottom-3 right-3 text-slate-500 font-mono text-[10px] pointer-events-none bg-slate-900/50 px-1.5 py-0.5 rounded">
-                        畫面寬度 = 100 cm
+                <!-- Prominent Scale / Unit Badge (Bottom Right) -->
+                <div class="overlay-unit-badge">
+                    <div class="unit-badge-width">
+                        <span class="dot-cyan"></span>
+                        <span>畫面寬度 = 100 cm</span>
+                    </div>
+                    <div class="unit-badge-time">
+                        <span class="dot-amber"></span>
+                        <span>時間單位 = 1.0 秒產生</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Sidebar Controls -->
-            <div class="w-full lg:w-72 flex flex-col gap-3 shrink-0">
+            <!-- Right Side: Sidebar Controls (STRICT 235px WIDTH) -->
+            <div class="sidebar-controls custom-scrollbar">
                 
-                <!-- Controls 1: Playback & Phase -->
-                <div class="control-group">
-                    <div>
-                        <h3 class="text-xs font-semibold text-slate-300 mb-2 flex justify-between items-center border-b border-slate-700 pb-1">
-                            <span>系統控制 SYSTEM</span>
-                            <span id="statusIndicator" class="text-[9px] font-mono bg-blue-900 text-blue-400 px-1.5 py-0.5 rounded border border-blue-700">RUNNING</span>
-                        </h3>
-                        <button id="btnPlayPause" class="btn w-full py-2 px-3 rounded text-[13px] font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)] mb-3 tracking-wider">
-                            暫停 (PAUSE)
-                        </button>
+                <!-- Group 1: Playback & Phase -->
+                <div class="control-group" style="flex-shrink: 0;">
+                    <div class="control-group-header">
+                        <span>系統控制 SYSTEM</span>
+                        <span id="statusIndicator" class="badge-running">RUNNING</span>
                     </div>
                     
-                    <div id="shiftContainer" class="opacity-40 transition-opacity">
-                        <div class="flex justify-between items-end mb-1">
-                            <label class="text-[11px] text-slate-400">水平位移 (虛線波)</label>
-                            <span id="valShift" class="text-[12px] font-mono text-emerald-400 font-bold">0 cm</span>
+                    <button id="btnPlayPause" class="btn btn-blue" style="margin-bottom: 4px; letter-spacing: 0.05em;">
+                        暫停 (PAUSE)
+                    </button>
+                    
+                    <div id="shiftContainer" style="opacity: 0.4; transition: opacity 0.2s;">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">水平位移 (虛線波)</span>
+                                <span id="valShift" class="slider-val val-emerald">0 cm</span>
+                            </div>
+                            <input type="range" id="inputShift" min="-50" max="50" step="1" value="0" disabled>
                         </div>
-                        <input type="range" id="inputShift" min="-50" max="50" step="1" value="0" disabled>
                         
-                        <button id="btnVectors" class="mt-2 w-full py-1.5 px-2 rounded text-[11px] font-bold tracking-wider border border-slate-600 bg-slate-800 text-slate-400 hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-                            開啟質點運動方向
+                        <button id="btnVectors" class="btn btn-secondary" disabled>
+                            質點運動方向 (點選紅點)
                         </button>
                     </div>
                 </div>
 
-                <!-- Controls 2: Magnifier (Sidebar integration) -->
-                <div class="control-group bg-slate-800/50">
-                    <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
-                        <h3 class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                            <span class="text-sm">🔍</span> 局部放大鏡
-                        </h3>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="toggleLens" class="sr-only peer">
-                            <div class="w-7 h-4 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-blue-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all shadow-inner"></div>
+                <!-- Group 2: Magnifier Controls -->
+                <div class="control-group" style="flex-shrink: 0; background-color: rgba(30, 41, 59, 0.4);">
+                    <div class="control-group-header">
+                        <span style="display: flex; align-items: center; gap: 4px;">
+                            <span>🔍</span> 局部放大鏡
+                        </span>
+                        <label class="switch-label">
+                            <input type="checkbox" id="toggleLens" class="switch-input">
+                            <span class="switch-track"></span>
                         </label>
                     </div>
                     
-                    <div id="lensSidebarControls" class="opacity-30 transition-opacity pointer-events-none flex flex-col gap-2">
-                        <div>
-                            <div class="flex justify-between items-end mb-0.5">
-                                <label class="text-[10px] text-slate-400">方框大小 (px)</label>
-                                <span id="valLensSize" class="text-[11px] font-mono text-emerald-400">200</span>
+                    <div id="lensSidebarControls" style="opacity: 0.3; pointer-events: none; transition: opacity 0.2s; display: flex; flex-direction: column; gap: 3px;">
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">方框大小 (px)</span>
+                                <span id="valLensSize" class="slider-val val-emerald">200</span>
                             </div>
-                            <input type="range" id="lensSizeInput" min="100" max="400" step="10" value="200" class="w-full">
+                            <input type="range" id="lensSizeInput" min="100" max="400" step="10" value="200">
                         </div>
-                        <div>
-                            <div class="flex justify-between items-end mb-0.5">
-                                <label class="text-[10px] text-slate-400">放大倍率 (x)</label>
-                                <span id="valLensZoom" class="text-[11px] font-mono text-amber-400">2.5</span>
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">放大倍率 (x)</span>
+                                <span id="valLensZoom" class="slider-val val-amber">2.5</span>
                             </div>
-                            <input type="range" id="lensZoomInput" min="1.5" max="6" step="0.1" value="2.5" class="w-full">
+                            <input type="range" id="lensZoomInput" min="1.5" max="6" step="0.1" value="2.5">
                         </div>
                     </div>
                 </div>
 
-                <!-- Controls 3: Info Panel -->
-                <div class="control-group flex-1 flex flex-col">
-                    <h3 class="text-xs font-semibold text-slate-300 mb-2 border-b border-slate-700 pb-1">數據監視 MONITOR</h3>
+                <!-- Group 3: Monitor -->
+                <div class="control-group monitor-card">
+                    <div class="control-group-header">
+                        <span>數據監視 MONITOR</span>
+                    </div>
                     
-                    <div class="info-panel flex-1 flex flex-col justify-center gap-1.5 text-sm">
-                        <div class="text-slate-400 text-[9px]">波速公式 WAVE FORMULA:</div>
-                        <div class="font-bold text-[15px] text-white flex gap-2 items-center justify-center bg-slate-900 py-1.5 rounded border border-slate-700 shadow-inner">
-                            <span class="text-pink-400">v</span> = 
-                            <span class="text-amber-400">f</span> × 
-                            <span class="text-blue-400">λ</span>
+                    <div class="info-panel">
+                        <div class="formula-title">波速公式 WAVE FORMULA:</div>
+                        <div class="formula-box">
+                            <span class="val-pink">v</span> = 
+                            <span class="val-amber">f</span> × 
+                            <span class="val-blue">λ</span>
                         </div>
-                        <div class="text-center font-mono tracking-wide mb-0.5 bg-slate-900/50 py-1 rounded">
-                            <span id="eqV" class="text-pink-400 font-bold text-[14px]">50</span> <span class="text-[9px] text-slate-500">cm/s</span> = 
-                            <span id="eqF" class="text-amber-400 font-bold text-[14px]">1.00</span> <span class="text-[9px] text-slate-500">Hz</span> × 
-                            <span id="eqL" class="text-blue-400 font-bold text-[14px]">50.0</span> <span class="text-[9px] text-slate-500">cm</span>
+                        <div class="equation-calc">
+                            <span id="eqV" class="val-pink" style="font-weight: bold;">50.0</span> <span style="font-size: 8px; color: #64748b;">cm/s</span> = 
+                            <span id="eqF" class="val-amber" style="font-weight: bold;">1.00</span> <span style="font-size: 8px; color: #64748b;">Hz</span> × 
+                            <span id="eqL" class="val-blue" style="font-weight: bold;">50.0</span> <span style="font-size: 8px; color: #64748b;">cm</span>
                         </div>
                         
-                        <div class="h-px bg-slate-700 my-0.5"></div>
+                        <div class="divider"></div>
                         
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-slate-400 text-[11px]">波長 Wavelength (λ)</span>
-                            <span id="infoLambda" class="font-bold text-[12px] text-blue-400">50.0 cm</span>
+                        <div class="stat-row">
+                            <span class="stat-label">頻率 (f)</span>
+                            <span id="infoFreq" class="stat-val val-amber">1.00 Hz</span>
                         </div>
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-slate-400 text-[11px]">頻率 Frequency (f)</span>
-                            <span id="infoFreq" class="font-bold text-[12px] text-amber-400">1.00 Hz</span>
+                        <div class="stat-row">
+                            <span class="stat-label">波長 (λ)</span>
+                            <span id="infoLambda" class="stat-val val-blue">50.0 cm</span>
                         </div>
-                        <div class="flex justify-between items-center px-1">
-                            <span class="text-slate-400 text-[11px]">週期 Period (T)</span>
-                            <span id="infoT" class="font-bold text-[12px] text-slate-300">1.00 s</span>
+                        <div class="stat-row">
+                            <span class="stat-label">波速 (v)</span>
+                            <span id="infoSpeed" class="stat-val val-pink">50.0 cm/s</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">週期 (T)</span>
+                            <span id="infoT" class="stat-val" style="color: #cbd5e1;">1.00 s</span>
                         </div>
                     </div>
                 </div>
@@ -239,44 +673,50 @@
             </div>
         </div>
 
-        <!-- Bottom Layout: Parameters -->
-        <div class="control-group !pt-3 !pb-4">
-            <h3 class="text-xs font-semibold text-slate-400 mb-2 border-b border-slate-700 pb-1">參數調整 PARAMETERS</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <!-- 3. Bottom Layout: Parameters (STRICT 3 COLUMNS, NEVER VERTICAL) -->
+        <div class="bottom-panel">
+            <div class="bottom-panel-header">
+                <span class="bottom-title">參數調整 PARAMETERS</span>
+                <span class="bottom-subtitle">100 cm 實體寬度 ｜ 1秒基準波</span>
+            </div>
+            <div class="parameters-grid">
                 
-                <div>
-                    <div class="flex justify-between items-end mb-1">
-                        <label class="text-[11px] text-slate-400">波速 WAVE SPEED (v)</label>
-                        <span id="valSpeed" class="text-sm font-mono text-pink-400 font-bold">50 cm/s</span>
+                <!-- Parameter 1: 頻率 (f) -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" style="color: #cbd5e1;">頻率 (f)</span>
+                        <span id="valFreq" class="slider-val val-amber">1.00 Hz</span>
                     </div>
-                    <input type="range" id="inputSpeed" min="10" max="200" step="10" value="50">
-                    <div class="flex justify-between mt-0.5 px-1">
-                        <span class="text-[9px] text-slate-500">10</span>
-                        <span class="text-[9px] text-slate-500">200</span>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between items-end mb-1">
-                        <label class="text-[11px] text-slate-400">顯示波數 (調整波長 λ)</label>
-                        <span id="valWaves" class="text-sm font-mono text-blue-400 font-bold">2.00</span>
-                    </div>
-                    <input type="range" id="inputWaves" min="0.5" max="5" step="0.25" value="2">
-                    <div class="flex justify-between mt-0.5 px-1">
-                        <span class="text-[9px] text-slate-500">長波長 (0.5波)</span>
-                        <span class="text-[9px] text-slate-500">短波長 (5.0波)</span>
+                    <input type="range" id="inputFreq" min="0.25" max="4.00" step="0.25" value="1.00">
+                    <div class="slider-scale">
+                        <span>0.25 Hz</span>
+                        <span>4.00 Hz</span>
                     </div>
                 </div>
 
-                <div>
-                    <div class="flex justify-between items-end mb-1">
-                        <label class="text-[11px] text-slate-400">震幅 AMPLITUDE (A)</label>
-                        <span id="valAmp" class="text-sm font-mono text-amber-500 font-bold">10 cm</span>
+                <!-- Parameter 2: 波長 (λ) -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" style="color: #cbd5e1;">波長 (λ)</span>
+                        <span id="valLambda" class="slider-val val-blue">50.0 cm</span>
+                    </div>
+                    <input type="range" id="inputLambda" min="20" max="100" step="5" value="50">
+                    <div class="slider-scale">
+                        <span>20 cm (短波)</span>
+                        <span>100 cm (長波)</span>
+                    </div>
+                </div>
+
+                <!-- Parameter 3: 震幅 (A) -->
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label" style="color: #cbd5e1;">震幅 (A)</span>
+                        <span id="valAmp" class="slider-val val-emerald">10 cm</span>
                     </div>
                     <input type="range" id="inputAmp" min="2" max="20" step="1" value="10">
-                    <div class="flex justify-between mt-0.5 px-1">
-                        <span class="text-[9px] text-slate-500">2</span>
-                        <span class="text-[9px] text-slate-500">20</span>
+                    <div class="slider-scale">
+                        <span>2 cm</span>
+                        <span>20 cm</span>
                     </div>
                 </div>
 
@@ -288,8 +728,9 @@
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         const screenContainer = document.getElementById('screenContainer');
+        const appContainer = document.getElementById('appContainer');
 
-        const W_cm = 100; 
+        const W_cm = 100; // Physical width is 100 cm
 
         let isPlaying = true;
         let showVectors = false; 
@@ -303,15 +744,16 @@
         let lensSize = 200;
         let lensZoom = 2.5;
 
-        // Parameters
-        let waveSpeed = 50; 
-        let numWaves = 2.0; 
-        let amp_cm = 10;    
-        let shiftX_cm = 0;  
+        // Interactive Selected Particles (Only show vector on clicked red dots)
+        const selectedParticles = new Set();
 
-        // Derived variables
-        let lambda_cm = 50;
-        let freq_hz = 1.0;
+        // Parameters
+        let freq_hz = 1.00;    // f (Hz)
+        let lambda_cm = 50.0;  // λ (cm)
+        let amp_cm = 10;       // A (cm)
+        let shiftX_cm = 0;     // cm
+        let waveSpeed = 50.0;  // v = f * λ (cm/s)
+        let numWaves = 2.0;    // N = 100 / λ
 
         const btnPlayPause = document.getElementById('btnPlayPause');
         const btnVectors = document.getElementById('btnVectors');
@@ -325,10 +767,11 @@
         const valLensSize = document.getElementById('valLensSize');
         const valLensZoom = document.getElementById('valLensZoom');
         
-        const inputSpeed = document.getElementById('inputSpeed');
-        const valSpeed = document.getElementById('valSpeed');
-        const inputWaves = document.getElementById('inputWaves');
-        const valWaves = document.getElementById('valWaves');
+        // Parameters Inputs
+        const inputFreq = document.getElementById('inputFreq');
+        const valFreq = document.getElementById('valFreq');
+        const inputLambda = document.getElementById('inputLambda');
+        const valLambda = document.getElementById('valLambda');
         const inputAmp = document.getElementById('inputAmp');
         const valAmp = document.getElementById('valAmp');
         const inputShift = document.getElementById('inputShift');
@@ -337,12 +780,26 @@
         const statusIndicator = document.getElementById('statusIndicator');
         const ch2Label = document.getElementById('ch2Label');
 
+        // Monitor elements
         const infoLambda = document.getElementById('infoLambda');
         const infoFreq = document.getElementById('infoFreq');
+        const infoSpeed = document.getElementById('infoSpeed');
         const infoT = document.getElementById('infoT');
         const eqV = document.getElementById('eqV');
         const eqF = document.getElementById('eqF');
         const eqL = document.getElementById('eqL');
+
+        // ==== Viewport Height Fix for Tablet / Mobile Browsers ====
+        function syncAppHeight() {
+            if (appContainer) {
+                appContainer.style.height = `${window.innerHeight}px`;
+            }
+            resize();
+        }
+        window.addEventListener('resize', syncAppHeight);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(syncAppHeight, 150);
+        });
 
         // ==== Lens Controls ====
         toggleLens.addEventListener('change', (e) => {
@@ -350,9 +807,11 @@
             if (lensActive) {
                 lensX = canvas.width / 2;
                 lensY = canvas.height / 2;
-                lensSidebarControls.classList.remove('opacity-30', 'pointer-events-none');
+                lensSidebarControls.style.opacity = '1';
+                lensSidebarControls.style.pointerEvents = 'auto';
             } else {
-                lensSidebarControls.classList.add('opacity-30', 'pointer-events-none');
+                lensSidebarControls.style.opacity = '0.3';
+                lensSidebarControls.style.pointerEvents = 'none';
             }
             if(!isPlaying) draw();
         });
@@ -369,62 +828,139 @@
             if(!isPlaying) draw();
         });
 
-        canvas.addEventListener('mousemove', (e) => {
+        // Pointermove for Mouse and Touch on Canvas
+        function handlePointerMove(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const posX = clientX - rect.left;
+            const posY = clientY - rect.top;
+
             if (lensActive) {
-                const rect = canvas.getBoundingClientRect();
-                lensX = e.clientX - rect.left;
-                lensY = e.clientY - rect.top;
+                lensX = posX;
+                lensY = posY;
                 if (!isPlaying) draw();
             }
+
+            if (!isPlaying && showVectors) {
+                const totalParticles = Math.floor(numWaves * 12);
+                const k_cm = 2 * Math.PI / lambda_cm;
+                const omega = 2 * Math.PI * freq_hz;
+                const centerY = canvas.height / 2;
+                let nearDot = false;
+
+                for (let i = 0; i <= totalParticles; i++) {
+                    const x_cm = i * (W_cm / totalParticles);
+                    const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
+                    const px = cmToPx(x_cm);
+                    const py = centerY - cmToPx(y_cm);
+                    const dist = Math.hypot(posX - px, posY - py);
+                    if (dist <= 16) {
+                        nearDot = true;
+                        break;
+                    }
+                }
+                canvas.style.cursor = nearDot ? 'pointer' : (lensActive ? 'crosshair' : 'default');
+            } else {
+                canvas.style.cursor = lensActive ? 'crosshair' : 'default';
+            }
+        }
+
+        canvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        // Pointer click / touch for Particle Selection (NO Play/Pause on canvas)
+        function handleSelectParticle(clientX, clientY) {
+            if (!isPlaying && showVectors) {
+                const rect = canvas.getBoundingClientRect();
+                const posX = clientX - rect.left;
+                const posY = clientY - rect.top;
+
+                const totalParticles = Math.floor(numWaves * 12);
+                const k_cm = 2 * Math.PI / lambda_cm;
+                const omega = 2 * Math.PI * freq_hz;
+                const centerY = canvas.height / 2;
+
+                let clickedIndex = -1;
+                let minDist = 22; // 22px touch target
+
+                for (let i = 0; i <= totalParticles; i++) {
+                    const x_cm = i * (W_cm / totalParticles);
+                    const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
+                    const px = cmToPx(x_cm);
+                    const py = centerY - cmToPx(y_cm);
+                    const dist = Math.hypot(posX - px, posY - py);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        clickedIndex = i;
+                    }
+                }
+
+                if (clickedIndex !== -1) {
+                    if (selectedParticles.has(clickedIndex)) {
+                        selectedParticles.delete(clickedIndex);
+                    } else {
+                        selectedParticles.add(clickedIndex);
+                    }
+                    updateVectorsButton();
+                    draw();
+                }
+            }
+        }
+
+        canvas.addEventListener('click', (e) => handleSelectParticle(e.clientX, e.clientY));
+        canvas.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                handleSelectParticle(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            }
         });
 
-        // ==== Canvas Click to Play/Pause ====
-        canvas.addEventListener('click', () => {
-            btnPlayPause.click();
-        });
-
-        // ==== Smart Resize Logic ====
+        // ==== ABSOLUTE 21:9 FIT-CONTAIN RESIZE LOGIC ====
         function resize() {
-            const containerWidth = screenContainer.clientWidth - 8; 
+            if (!screenContainer) return;
+            const availW = screenContainer.clientWidth - 4; 
+            const availH = screenContainer.clientHeight - 4;
             
-            let targetW = containerWidth;
-            let targetH = targetW * (9 / 21); // Strict 21:9 Aspect Ratio
+            if (availW <= 0 || availH <= 0) return;
 
-            const maxAllowedH = window.innerHeight - 200; 
+            let targetW = availW;
+            let targetH = targetW * (9 / 21);
 
-            if (targetH > maxAllowedH) {
-                targetH = maxAllowedH;
-                targetW = targetH * (21 / 9); 
+            if (targetH > availH) {
+                targetH = availH;
+                targetW = targetH * (21 / 9);
             }
 
-            canvas.width = targetW;
-            canvas.height = targetH;
-            canvas.style.margin = "0 auto";
+            canvas.width = Math.floor(targetW);
+            canvas.height = Math.floor(targetH);
+            canvas.style.margin = "auto";
 
             if(!isPlaying) draw();
         }
-        window.addEventListener('resize', resize);
         
         // ==== Core Logic ====
         function updateInfo() {
-            lambda_cm = W_cm / numWaves;
-            freq_hz = waveSpeed / lambda_cm;
+            waveSpeed = freq_hz * lambda_cm;
+            numWaves = W_cm / lambda_cm;
 
-            infoLambda.textContent = lambda_cm.toFixed(1) + ' cm';
             infoFreq.textContent = freq_hz.toFixed(2) + ' Hz';
+            infoLambda.textContent = lambda_cm.toFixed(1) + ' cm';
+            infoSpeed.textContent = waveSpeed.toFixed(1) + ' cm/s';
             infoT.textContent = (freq_hz > 0 ? (1 / freq_hz).toFixed(2) : '∞') + ' s';
 
-            eqV.textContent = waveSpeed.toFixed(0);
+            eqV.textContent = waveSpeed.toFixed(1);
             eqF.textContent = freq_hz.toFixed(2);
             eqL.textContent = lambda_cm.toFixed(1);
         }
 
         function updateUI() {
-            waveSpeed = parseFloat(inputSpeed.value);
-            valSpeed.textContent = waveSpeed.toFixed(0) + ' cm/s';
-            
-            numWaves = parseFloat(inputWaves.value);
-            valWaves.textContent = numWaves.toFixed(2);
+            freq_hz = parseFloat(inputFreq.value);
+            valFreq.textContent = freq_hz.toFixed(2) + ' Hz';
+
+            lambda_cm = parseFloat(inputLambda.value);
+            valLambda.textContent = lambda_cm.toFixed(1) + ' cm';
             
             amp_cm = parseFloat(inputAmp.value);
             valAmp.textContent = amp_cm.toFixed(0) + ' cm';
@@ -435,27 +971,29 @@
 
             if (isPlaying) {
                 btnPlayPause.textContent = '暫停 (PAUSE)';
-                btnPlayPause.className = 'btn w-full py-2 px-3 rounded text-[13px] font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.3)] mb-3 tracking-wider';
-                shiftContainer.style.opacity = '0.3';
+                btnPlayPause.className = 'btn btn-blue';
+                shiftContainer.style.opacity = '0.4';
                 inputShift.disabled = true;
                 btnVectors.disabled = true;
                 
                 inputShift.value = 0;
                 shiftX_cm = 0;
                 valShift.textContent = '0 cm';
+                selectedParticles.clear();
                 
                 statusIndicator.textContent = 'RUNNING';
-                statusIndicator.className = 'text-[9px] font-mono bg-blue-900 text-blue-400 px-1.5 py-0.5 rounded border border-blue-700';
+                statusIndicator.className = 'badge-running';
                 ch2Label.style.opacity = '0';
+                legendVectors.style.opacity = '0';
             } else {
                 btnPlayPause.textContent = '播放 (PLAY)';
-                btnPlayPause.className = 'btn w-full py-2 px-3 rounded text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)] mb-3 tracking-wider';
+                btnPlayPause.className = 'btn btn-emerald';
                 shiftContainer.style.opacity = '1';
                 inputShift.disabled = false;
                 btnVectors.disabled = false;
                 
                 statusIndicator.textContent = 'PAUSED';
-                statusIndicator.className = 'text-[9px] font-mono bg-amber-900 text-amber-400 px-1.5 py-0.5 rounded border border-amber-700 animate-pulse';
+                statusIndicator.className = 'badge-paused';
                 ch2Label.style.opacity = '1';
             }
             updateInfo();
@@ -466,6 +1004,7 @@
             if (isPlaying) {
                 lastFrameTime = performance.now();
                 showVectors = false; 
+                selectedParticles.clear();
                 updateVectorsButton();
             }
             updateUI();
@@ -474,14 +1013,13 @@
 
         function updateVectorsButton() {
             if (showVectors) {
-                btnVectors.classList.remove('bg-slate-800', 'text-slate-400', 'border-slate-600');
-                btnVectors.classList.add('bg-amber-600', 'text-white', 'border-amber-500', 'shadow-[0_0_10px_rgba(245,158,11,0.5)]');
-                btnVectors.textContent = '關閉質點運動方向';
+                btnVectors.classList.add('btn-active-vectors');
+                const count = selectedParticles.size;
+                btnVectors.textContent = count > 0 ? `關閉方向 (已選 ${count} 點)` : '關閉質點運動方向';
                 legendVectors.style.opacity = '1';
             } else {
-                btnVectors.classList.add('bg-slate-800', 'text-slate-400', 'border-slate-600');
-                btnVectors.classList.remove('bg-amber-600', 'text-white', 'border-amber-500', 'shadow-[0_0_10px_rgba(245,158,11,0.5)]');
-                btnVectors.textContent = '開啟質點運動方向';
+                btnVectors.classList.remove('btn-active-vectors');
+                btnVectors.textContent = '質點運動方向 (點選紅點)';
                 legendVectors.style.opacity = '0';
             }
         }
@@ -489,16 +1027,18 @@
         btnVectors.addEventListener('click', () => {
             if (isPlaying) return;
             showVectors = !showVectors;
+            if (!showVectors) {
+                selectedParticles.clear();
+            }
             updateVectorsButton();
             draw();
         });
 
-        inputSpeed.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
-        inputWaves.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
+        inputFreq.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
+        inputLambda.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
         inputAmp.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
         inputShift.addEventListener('input', () => { updateUI(); draw(); });
 
-        // Convert cm to pixels
         function cmToPx(cm) {
             return cm * (canvas.width / W_cm);
         }
@@ -599,10 +1139,19 @@
                     const px = cmToPx(x_cm);
                     const py = centerY - cmToPx(y_cm);
                     
+                    // Selected particle highlight halo
+                    if (selectedParticles.has(i) && !isPlaying && showVectors) {
+                        ctx.beginPath();
+                        ctx.arc(px, py, 9, 0, 2*Math.PI);
+                        ctx.strokeStyle = '#facc15'; 
+                        ctx.lineWidth = 2.5;
+                        ctx.stroke();
+                    }
+
                     ctx.shadowBlur = 8;
                     ctx.shadowColor = '#ef4444';
                     ctx.beginPath();
-                    ctx.arc(px, py, 5, 0, 2*Math.PI);
+                    ctx.arc(px, py, 4.5, 0, 2*Math.PI);
                     ctx.fill();
                     ctx.shadowBlur = 0;
 
@@ -633,6 +1182,8 @@
         }
 
         function drawVectors() {
+            if (selectedParticles.size === 0) return;
+
             const W = canvas.width;
             const centerY = canvas.height / 2;
             const k_cm = 2 * Math.PI / lambda_cm;
@@ -643,7 +1194,9 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            for (let i = 0; i <= totalParticles; i++) {
+            selectedParticles.forEach(i => {
+                if (i > totalParticles) return;
+
                 const x_cm = i * (W_cm / totalParticles);
                 const y_cm_blue = amp_cm * Math.sin(k_cm * x_cm - omega * time);
                 const y_cm_green = amp_cm * Math.sin(k_cm * (x_cm - shiftX_cm) - omega * time);
@@ -656,40 +1209,43 @@
                 const arrowColor = dist < 0 ? '#fbbf24' : '#e879f9'; 
                 
                 ctx.beginPath();
-                ctx.arc(px, py_green, 3.5, 0, 2*Math.PI);
+                ctx.arc(px, py_green, 4.5, 0, 2*Math.PI);
                 ctx.fillStyle = arrowColor; 
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = arrowColor;
                 ctx.fill();
+                ctx.shadowBlur = 0;
 
-                let numOffset = 16;
+                let numOffset = 15;
                 if (Math.abs(dist) > 2) {
-                    numOffset = dist > 0 ? -16 : 16; 
+                    numOffset = dist > 0 ? -15 : 15; 
                 } else {
-                    numOffset = y_cm_blue >= 0 ? 16 : -16; 
+                    numOffset = y_cm_blue >= 0 ? 15 : -15; 
                 }
                 
                 if (Math.abs(dist) > 4) {
-                    let startY = py_blue + (dist > 0 ? 7 : -7);
+                    let startY = py_blue + (dist > 0 ? 6 : -6);
                     let endY = py_green - (dist > 0 ? 5 : -5);
                     
                     if (Math.abs(endY - startY) > 2) {
                         ctx.strokeStyle = arrowColor; 
                         ctx.fillStyle = arrowColor;
-                        ctx.lineWidth = 1.5;
+                        ctx.lineWidth = 2.5;
                         drawVerticalArrow(ctx, px, startY, px, endY);
                     }
                 }
 
                 const text = (i + 1).toString();
                 const textW = ctx.measureText(text).width;
-                ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; 
-                ctx.fillRect(px - textW/2 - 3, py_blue + numOffset - 7, textW + 6, 14);
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.9)'; 
+                ctx.fillRect(px - textW/2 - 3, py_blue + numOffset - 6, textW + 6, 13);
                 
                 ctx.fillStyle = arrowColor; 
                 ctx.fillText(text, px, py_blue + numOffset);
-            }
+            });
         }
 
-        // ================== NEW SHIFT VISUALIZATIONS ==================
+        // ================== SHIFT VISUALIZATIONS ==================
 
         function drawCrestArrows() {
             const W = canvas.width;
@@ -698,31 +1254,27 @@
             const omega = 2 * Math.PI * freq_hz;
             
             ctx.save();
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)'; // Emerald-400
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
             ctx.setLineDash([4, 4]);
 
-            // Track crests across a wide range
             for (let n = -10; n <= 10; n++) {
-                // Find x coordinates of the crests (where sin = 1)
                 const x_crest_cm = (Math.PI / 2 + omega * time + 2 * n * Math.PI) / k_cm;
                 
                 if (x_crest_cm > -lambda_cm && x_crest_cm < W_cm + lambda_cm) {
                     const startX_px = cmToPx(x_crest_cm);
-                    const startY_px = centerY - cmToPx(amp_cm); // Top of the crest
+                    const startY_px = centerY - cmToPx(amp_cm);
                     
                     const endX_px = cmToPx(x_crest_cm + shiftX_cm);
                     const endY_px = startY_px; 
                     
-                    // Only draw if shift is visible enough
-                    if (Math.abs(endX_px - startX_px) > 10) {
+                    if (Math.abs(endX_px - startX_px) > 8) {
                         ctx.beginPath();
                         ctx.moveTo(startX_px, startY_px);
                         ctx.lineTo(endX_px, endY_px);
                         ctx.stroke();
                         
-                        // Small horizontal arrowhead
-                        const headlen = 8;
+                        const headlen = 7;
                         const angle = shiftX_cm > 0 ? 0 : Math.PI;
                         ctx.save();
                         ctx.setLineDash([]);
@@ -743,7 +1295,7 @@
         function drawShiftHUD() {
             const W = canvas.width;
             const px = W / 2;
-            const py = 50; // Y-center of the HUD box
+            const py = 42; 
             
             const isRight = shiftX_cm > 0;
             const absShift = Math.abs(shiftX_cm);
@@ -751,56 +1303,55 @@
             
             ctx.save();
             
-            // 1. Draw Background Pill (Semi-transparent)
-            ctx.fillStyle = 'rgba(2, 6, 23, 0.85)'; // slate-950
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)'; // emerald border
+            // 1. Background Pill
+            ctx.fillStyle = 'rgba(2, 6, 23, 0.88)';
+            ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
             ctx.lineWidth = 1;
-            const pillW = 220;
-            const pillH = 90;
+            const pillW = 190;
+            const pillH = 72;
             ctx.beginPath();
-            ctx.roundRect(px - pillW/2, py - 20, pillW, pillH, 12);
+            ctx.roundRect(px - pillW/2, py - 18, pillW, pillH, 8);
             ctx.fill();
             ctx.stroke();
 
-            // 2. Draw a big thick central arrow
-            const arrowW = 100;
+            // 2. Big Arrow
+            const arrowW = 80;
             const startX = isRight ? px - arrowW/2 : px + arrowW/2;
             const endX = isRight ? px + arrowW/2 : px - arrowW/2;
             
-            ctx.strokeStyle = '#34d399'; // emerald-400
-            ctx.lineWidth = 6;
-            ctx.shadowBlur = 10;
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 4.5;
+            ctx.shadowBlur = 8;
             ctx.shadowColor = '#10b981';
             
-            const headlen = 16; 
+            const headlen = 13; 
             const angle = Math.atan2(0, endX - startX);
             
             ctx.beginPath();
-            ctx.moveTo(startX, py + 25);
-            ctx.lineTo(endX, py + 25);
+            ctx.moveTo(startX, py + 18);
+            ctx.lineTo(endX, py + 18);
             ctx.stroke();
             
-            // Solid arrow head
             ctx.setLineDash([]);
             ctx.fillStyle = ctx.strokeStyle;
             ctx.beginPath();
-            ctx.moveTo(endX, py + 25);
-            ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), py + 25 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), py + 25 - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.moveTo(endX, py + 18);
+            ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), py + 18 - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), py + 18 - headlen * Math.sin(angle + Math.PI / 6));
             ctx.closePath();
             ctx.fill();
             
             // 3. Texts
             ctx.shadowBlur = 0;
-            ctx.font = 'bold 16px "Segoe UI", system-ui, sans-serif';
+            ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
             ctx.fillStyle = '#a7f3d0';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`平移方向：向${isRight ? '右' : '左'}`, px, py);
+            ctx.fillText(`平移方向：向${isRight ? '右' : '左'}`, px, py - 3);
             
-            ctx.font = 'bold 24px "Courier New", Courier, monospace';
+            ctx.font = 'bold 18px "Courier New", Courier, monospace';
             ctx.fillStyle = '#34d399';
-            ctx.fillText(distText, px, py + 48);
+            ctx.fillText(distText, px, py + 36);
             
             ctx.restore();
         }
@@ -812,7 +1363,7 @@
             
             if (!isPlaying && shiftX_cm !== 0) {
                 drawWave(time, shiftX_cm, true, '#10b981', true); 
-                drawCrestArrows(); // Connect the crests to show shift physically
+                drawCrestArrows();
             }
             
             drawWave(time, 0, false, '#60a5fa', true);
@@ -822,7 +1373,7 @@
             }
 
             if (!isPlaying && shiftX_cm !== 0) {
-                drawShiftHUD(); // Draw the big HUD overlay last so it stays on top
+                drawShiftHUD();
             }
         }
 
@@ -836,41 +1387,36 @@
                 ctx.save();
                 const halfSize = lensSize / 2;
 
-                // 1. Fill lens background
                 ctx.beginPath();
                 ctx.rect(lensX - halfSize, lensY - halfSize, lensSize, lensSize);
                 ctx.fillStyle = '#020617'; 
                 ctx.fill();
 
-                // 2. Clip to lens area
                 ctx.clip(); 
 
-                // 3. Apply zoom transform
                 ctx.translate(lensX, lensY);
                 ctx.scale(lensZoom, lensZoom);
                 ctx.translate(-lensX, -lensY);
 
-                // 4. Redraw scene inside the clipped, zoomed area
                 drawScene();
 
                 ctx.restore();
 
-                // 5. Draw lens border & crosshair
                 ctx.beginPath();
                 ctx.rect(lensX - halfSize, lensY - halfSize, lensSize, lensSize);
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = 2;
                 ctx.strokeStyle = '#38bdf8'; 
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.rect(lensX - halfSize - 2, lensY - halfSize - 2, lensSize + 4, lensSize + 4);
+                ctx.rect(lensX - halfSize - 1.5, lensY - halfSize - 1.5, lensSize + 3, lensSize + 3);
                 ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 2.5;
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.moveTo(lensX - 10, lensY); ctx.lineTo(lensX + 10, lensY);
-                ctx.moveTo(lensX, lensY - 10); ctx.lineTo(lensX, lensY + 10);
+                ctx.moveTo(lensX - 8, lensY); ctx.lineTo(lensX + 8, lensY);
+                ctx.moveTo(lensX, lensY - 8); ctx.lineTo(lensX, lensY + 8);
                 ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
@@ -888,18 +1434,16 @@
             if(Math.floor(now / 500) % 2 === 0) {
                 document.getElementById('sysTime').style.opacity = '1';
             } else {
-                document.getElementById('sysTime').style.opacity = '0.5';
+                document.getElementById('sysTime').style.opacity = '0.4';
             }
 
             requestAnimationFrame(animate);
         }
 
-        // Initialize with slight delay to ensure container width is calculated
-        setTimeout(() => {
-            resize();
-            updateUI();
-            requestAnimationFrame(animate);
-        }, 50);
+        // Start initialization
+        syncAppHeight();
+        updateUI();
+        requestAnimationFrame(animate);
     </script>
 </body>
 </html>
