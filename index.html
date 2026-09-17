@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>波動物理演示系統 10.0 完美版</title>
-    <!-- 100% Native Self-Contained CSS: Zero external CDN dependencies, 100% offline-ready -->
+    <title>波動物理演示系統 10.0 旗艦版 (大字體公式 + 逐步手部教學)</title>
+    <!-- 100% Native Pure CSS: Zero external dependencies, offline ready -->
     <style>
         * {
             box-sizing: border-box;
@@ -40,18 +40,23 @@
             background-color: #1e293b;
         }
 
-        /* Header */
+        /* Top Header Navigation */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            height: 22px;
+            height: 28px;
             border-bottom: 1px solid rgba(51, 65, 85, 0.6);
-            padding-bottom: 2px;
+            padding-bottom: 4px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .header-title {
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #e2e8f0;
             letter-spacing: 0.04em;
@@ -71,24 +76,94 @@
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.4; transform: scale(0.9); }
         }
-        .badge-version {
-            font-size: 10px;
-            color: #fbbf24;
-            font-family: monospace;
-            border: 1px solid rgba(245, 158, 11, 0.4);
-            padding: 1px 4px;
-            border-radius: 3px;
-            background-color: rgba(69, 26, 3, 0.4);
+
+        /* Primary Page Switcher Tabs */
+        .nav-tabs {
+            display: flex;
+            background-color: #0f172a;
+            border: 1px solid #3b82f6;
+            border-radius: 5px;
+            padding: 2px;
+            gap: 3px;
         }
+        .nav-tab-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .nav-tab-btn.active {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+        }
+        .nav-tab-btn:hover:not(.active) {
+            color: #e2e8f0;
+            background-color: #1e293b;
+        }
+
+        /* Sub-Mode Switcher in Tab 1 */
+        .mode-switcher {
+            display: flex;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1.5px;
+            gap: 2px;
+        }
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .mode-btn.active {
+            background-color: #0284c7;
+            color: #ffffff;
+            box-shadow: 0 0 6px rgba(2, 132, 199, 0.4);
+        }
+        .mode-btn:hover:not(.active) {
+            color: #e2e8f0;
+            background-color: #1e293b;
+        }
+
         .header-status {
             font-size: 10px;
             font-family: monospace;
             color: #34d399;
-            opacity: 0.7;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        /* Middle Main Workspace: STRICT ROW */
-        .main-workspace {
+        /* View Containers */
+        .view-content {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        /* ======================================================== */
+        /* TAB 1: CONTINUOUS WAVE OSCILLOSCOPE LAYOUT              */
+        /* ======================================================== */
+        .oscilloscope-workspace {
             flex: 1;
             min-height: 0;
             display: flex;
@@ -97,7 +172,7 @@
             width: 100%;
         }
 
-        /* Screen Container */
+        /* Oscilloscope Screen Container */
         .screen-container {
             flex: 1;
             min-width: 0;
@@ -112,312 +187,260 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            touch-action: none;
         }
         canvas {
             display: block;
-            border-radius: 4px;
-            background: #020617;
+            width: 100%;
+            height: 100%;
         }
 
-        /* Overlays */
+        /* Oscilloscope Screen Badges */
         .overlay-ch-labels {
             position: absolute;
             top: 8px;
             left: 10px;
-            color: #34d399;
             font-family: monospace;
             font-size: 10px;
-            opacity: 0.85;
+            font-weight: bold;
+            color: #94a3b8;
             pointer-events: none;
             display: flex;
-            flex-direction: column;
-            gap: 2px;
+            gap: 12px;
+            background-color: rgba(15, 23, 42, 0.75);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
         }
-        .ch1-text { color: #60a5fa; }
-        .ch2-text { color: #10b981; }
+        .ch1-text { color: #38bdf8; }
+        .ch2-text { color: #34d399; }
 
         .overlay-legend {
             position: absolute;
-            top: 40px;
-            left: 10px;
+            top: 8px;
+            right: 10px;
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(71, 85, 105, 0.7);
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 10px;
             font-family: monospace;
-            font-size: 9px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
             pointer-events: none;
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 2px;
-            background-color: rgba(15, 23, 42, 0.9);
-            padding: 5px 8px;
-            border-radius: 5px;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            z-index: 10;
         }
-        .legend-up { color: #fbbf24; }
-        .legend-down { color: #e879f9; }
-        .legend-tip { font-size: 8px; color: #22d3ee; margin-top: 2px; }
+        .legend-up { color: #fbbf24; font-weight: bold; }
+        .legend-down { color: #e879f9; font-weight: bold; }
+        .legend-tip { font-size: 8.5px; color: #94a3b8; margin-top: 1px; }
 
         .overlay-unit-badge {
             position: absolute;
-            bottom: 10px;
-            right: 12px;
-            pointer-events: none;
-            background-color: rgba(2, 6, 23, 0.95);
-            padding: 5px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(6, 182, 212, 0.6);
-            box-shadow: 0 0 14px rgba(6, 182, 212, 0.3);
+            bottom: 8px;
+            right: 10px;
             display: flex;
             flex-direction: column;
+            gap: 3px;
+            pointer-events: none;
             align-items: flex-end;
-            gap: 2px;
+            z-index: 10;
         }
         .unit-badge-width {
-            color: #67e8f9;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 11px;
-            letter-spacing: 0.03em;
+            background-color: rgba(15, 23, 42, 0.9);
+            border: 1.5px solid #06b6d4;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #22d3ee;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
             display: flex;
             align-items: center;
             gap: 5px;
+            letter-spacing: 0.02em;
         }
         .unit-badge-time {
-            color: #fcd34d;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 11px;
-            letter-spacing: 0.03em;
+            background-color: rgba(15, 23, 42, 0.9);
+            border: 1.5px solid #f59e0b;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #fbbf24;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
             display: flex;
             align-items: center;
             gap: 5px;
+            letter-spacing: 0.02em;
         }
         .dot-cyan {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: #22d3ee;
-            box-shadow: 0 0 6px #22d3ee;
+            width: 7px; height: 7px; border-radius: 50%; background-color: #22d3ee;
+            box-shadow: 0 0 6px #22d3ee; display: inline-block;
         }
         .dot-amber {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: #fbbf24;
+            width: 7px; height: 7px; border-radius: 50%; background-color: #fbbf24;
+            box-shadow: 0 0 6px #fbbf24; display: inline-block;
         }
 
-        /* Right Sidebar Controls */
+        /* Sidebar Controls - Expanded to 300px for giant formula readability */
         .sidebar-controls {
-            width: 235px;
+            width: 320px;
             flex-shrink: 0;
-            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             gap: 6px;
             overflow-y: auto;
+            overflow-x: hidden;
+            height: 100%;
         }
 
-        /* Control Cards */
         .control-group {
             background-color: #0f172a;
             border: 1px solid #334155;
-            border-radius: 6px;
-            padding: 6px 9px;
+            border-radius: 5px;
+            padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
         .control-group-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
-            border-bottom: 1px solid rgba(51, 65, 85, 0.6);
-            padding-bottom: 3px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #cbd5e1;
-        }
-        .badge-running {
-            font-size: 9px;
-            font-family: monospace;
-            background-color: #1e3a8a;
-            color: #60a5fa;
-            padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid #1d4ed8;
-        }
-        .badge-paused {
-            font-size: 9px;
-            font-family: monospace;
-            background-color: #78350f;
-            color: #fbbf24;
-            padding: 1px 4px;
-            border-radius: 3px;
-            border: 1px solid #b45309;
+            font-size: 10.5px;
+            font-weight: bold;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            padding-bottom: 2px;
         }
 
-        /* Buttons */
+        /* UI Buttons */
         .btn {
             display: block;
             width: 100%;
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-weight: bold;
+            padding: 5px 0;
             font-size: 11px;
-            text-align: center;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 1px solid transparent;
             cursor: pointer;
-            border: none;
+            text-align: center;
             transition: all 0.15s ease;
-        }
-        .btn:active {
-            transform: scale(0.97);
         }
         .btn-blue {
             background-color: #2563eb;
             color: #ffffff;
-            box-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+            border-color: #1d4ed8;
         }
-        .btn-blue:hover {
-            background-color: #3b82f6;
-        }
+        .btn-blue:hover { background-color: #1d4ed8; }
         .btn-emerald {
             background-color: #059669;
             color: #ffffff;
-            box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+            border-color: #047857;
         }
-        .btn-emerald:hover {
-            background-color: #10b981;
-        }
+        .btn-emerald:hover { background-color: #047857; }
         .btn-secondary {
-            background-color: #1e293b;
-            border: 1px solid #475569;
-            color: #94a3b8;
-            font-size: 10px;
-            margin-top: 4px;
-        }
-        .btn-secondary:hover {
             background-color: #334155;
-            color: #e2e8f0;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+        .btn-secondary:hover:not(:disabled) { background-color: #475569; color: #ffffff; }
+        .btn-secondary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
         .btn-active-vectors {
             background-color: #d97706 !important;
             color: #ffffff !important;
-            border-color: #f59e0b !important;
-            box-shadow: 0 0 8px rgba(245, 158, 11, 0.5) !important;
-        }
-
-        /* Switch */
-        .switch-label {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        .switch-input {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .switch-track {
-            width: 26px;
-            height: 14px;
-            background-color: #334155;
-            border-radius: 9999px;
-            position: relative;
-            transition: background-color 0.2s;
-        }
-        .switch-track::after {
-            content: '';
-            position: absolute;
-            top: 1.5px;
-            left: 1.5px;
-            width: 11px;
-            height: 11px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-        .switch-input:checked + .switch-track {
-            background-color: #3b82f6;
-        }
-        .switch-input:checked + .switch-track::after {
-            transform: translateX(12px);
+            border-color: #b45309 !important;
+            box-shadow: 0 0 6px rgba(217, 119, 6, 0.5);
         }
 
         /* Sliders */
         .slider-container {
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
         }
         .slider-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
-        }
-        .slider-label {
+            align-items: center;
             font-size: 10px;
-            color: #94a3b8;
-            font-weight: 500;
         }
-        .slider-val {
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 11px;
-        }
+        .slider-label { color: #94a3b8; }
+        .slider-val { font-family: monospace; font-weight: bold; }
         .val-emerald { color: #34d399; }
         .val-amber { color: #fbbf24; }
-        .val-blue { color: #60a5fa; }
+        .val-blue { color: #38bdf8; }
         .val-pink { color: #f472b6; }
+        .val-purple { color: #c084fc; }
 
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+            outline: none;
+            margin: 3px 0;
+            cursor: pointer;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
         .slider-scale {
             display: flex;
             justify-content: space-between;
             font-size: 8px;
             color: #64748b;
+            font-family: monospace;
         }
 
-        /* Range input styling */
-        input[type=range] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            background: transparent;
-            cursor: pointer;
-            margin: 2px 0;
+        /* Switch */
+        .switch-label {
+            position: relative;
+            display: inline-block;
+            width: 28px;
+            height: 16px;
         }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 14px;
-            width: 14px;
+        .switch-input { opacity: 0; width: 0; height: 0; }
+        .switch-track {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155;
+            transition: .2s;
+            border-radius: 16px;
+        }
+        .switch-track:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .2s;
             border-radius: 50%;
-            background: #3b82f6;
-            cursor: pointer;
-            margin-top: -5px;
-            box-shadow: 0 0 6px rgba(59, 130, 246, 0.8);
-            border: 2px solid #fff;
-            transition: transform 0.1s;
         }
-        input[type=range]:active::-webkit-slider-thumb {
-            transform: scale(1.2);
-        }
-        input[type=range]:disabled::-webkit-slider-thumb {
-            background: #64748b;
-            box-shadow: none;
-            border-color: #94a3b8;
-            cursor: not-allowed;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #475569;
-            border-radius: 2px;
-        }
+        .switch-input:checked + .switch-track { background-color: #2563eb; }
+        .switch-input:checked + .switch-track:before { transform: translateX(12px); }
 
-        /* Monitor Panel */
+        /* Monitor Card with 3X Extra-Large Classroom Formula */
         .monitor-card {
             flex: 1;
             min-height: 0;
@@ -428,57 +451,110 @@
         .info-panel {
             font-family: 'Courier New', Courier, monospace;
             background-color: #020617;
-            border: 1px solid #334155;
-            border-radius: 5px;
-            padding: 5px 7px;
+            border: 1.5px solid #334155;
+            border-radius: 6px;
+            padding: 6px 8px;
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
             flex: 1;
-            gap: 2px;
+            gap: 4px;
         }
         .formula-title {
-            font-size: 9px;
-            color: #94a3b8;
+            font-size: 20px;
+            color: #38bdf8;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
         }
+        /* 3X Enormous Formula Box (v = f × λ) */
         .formula-box {
-            font-weight: bold;
-            font-size: 12px;
+            font-weight: 900;
+            font-size: 44px;
             color: #ffffff;
             display: flex;
-            gap: 4px;
+            gap: 8px;
             align-items: center;
             justify-content: center;
             background-color: #0f172a;
-            padding: 2px 0;
-            border-radius: 4px;
-            border: 1px solid rgba(51, 65, 85, 0.7);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            padding: 6px 0;
+            border-radius: 6px;
+            border: 1.5px solid rgba(59, 130, 246, 0.6);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 15px rgba(37, 99, 235, 0.3);
+            letter-spacing: 0.06em;
+            line-height: 1;
         }
+        /* 3X Enormous Calculation Box with Structured Numbers & Units */
         .equation-calc {
-            text-align: center;
-            font-family: monospace;
-            font-size: 10px;
-            background-color: rgba(15, 23, 42, 0.4);
-            padding: 1px 0;
-            border-radius: 3px;
+            background-color: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid rgba(71, 85, 105, 0.7);
+            border-radius: 6px;
+            padding: 6px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.6);
         }
+        .eq-num-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 3px;
+            font-family: 'Segoe UI', system-ui, monospace;
+            line-height: 1;
+        }
+        .eq-num {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+        .eq-op {
+            font-size: 24px;
+            font-weight: 900;
+            color: #cbd5e1;
+            margin: 0 2px;
+        }
+        .eq-unit-row {
+            display: flex;
+            justify-content: space-around;
+            font-size: 10px;
+            color: #94a3b8;
+            font-family: monospace;
+            font-weight: bold;
+            border-top: 1px solid rgba(51, 65, 85, 0.4);
+            padding-top: 4px;
+            margin-top: 2px;
+        }
+
         .divider {
-            height: 1px;
+            height: 1.5px;
             background-color: #334155;
-            margin: 1px 0;
+            margin: 3px 0;
         }
         .stat-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 2px;
-            font-size: 10px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.3);
         }
-        .stat-label { color: #94a3b8; }
-        .stat-val { font-weight: bold; }
+        .stat-label {
+            color: #cbd5e1;
+            font-size: 19px;
+            font-weight: 800;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            letter-spacing: 0.02em;
+        }
+        .stat-val {
+            font-weight: 900;
+            font-size: 24px;
+            font-family: monospace;
+            letter-spacing: -0.02em;
+        }
 
-        /* Bottom Parameter Bar: STRICT 3 COLUMNS */
+        /* Bottom Parameter Bar: 4-COLUMN RESPONSIVE LAYOUT */
         .bottom-panel {
             flex-shrink: 0;
             background-color: #0f172a;
@@ -502,15 +578,269 @@
             color: #94a3b8;
         }
         .bottom-subtitle {
-            font-size: 8px;
+            font-size: 8.5px;
             color: #64748b;
             font-family: monospace;
         }
         .parameters-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
             padding: 0 2px;
+        }
+
+        /* ======================================================== */
+        /* TAB 2: BEAD STRING WAVE GENERATOR (質點繩波產生器)        */
+        /* ======================================================== */
+        .bead-view-container {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .bead-top-toolbar {
+            flex-shrink: 0;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toolbar-label {
+            font-size: 10.5px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .bead-workspace {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+            width: 100%;
+        }
+
+        /* Bead Canvas Container */
+        .bead-canvas-container {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            background: linear-gradient(180deg, #dce4ba 0%, #d4dfae 100%);
+            border: 3px solid #859163;
+            border-radius: 6px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.18), 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+        .bead-canvas-container.dark-theme {
+            background: #020617;
+            border-color: #334155;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        /* Bead Canvas Overlays */
+        .bead-hud {
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            background-color: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(71, 85, 105, 0.8);
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-size: 12px;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+            backdrop-filter: blur(4px);
+            max-width: 480px;
+        }
+        .bead-hud-title {
+            font-size: 10.5px;
+            color: #38bdf8;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .bead-hud-stage {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #facc15;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .bead-hud-desc {
+            font-size: 10.5px;
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+
+        .bead-hud-right {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            background-color: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(71, 85, 105, 0.8);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Bead Sidebar Controls */
+        .bead-sidebar {
+            width: 280px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100%;
+        }
+
+        /* 4-Stage Progress Stepper in Bead Mode 1 */
+        .stage-stepper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stage-step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            background-color: rgba(2, 6, 23, 0.5);
+            border: 1px solid rgba(51, 65, 85, 0.4);
+            font-size: 9.5px;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+        }
+        .stage-step.active {
+            background-color: rgba(37, 99, 235, 0.25);
+            border-color: #3b82f6;
+            color: #60a5fa;
+            font-weight: bold;
+        }
+        .stage-step.done {
+            background-color: rgba(16, 185, 129, 0.15);
+            border-color: #10b981;
+            color: #34d399;
+        }
+        .step-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8.5px;
+            font-weight: 800;
+            background-color: #334155;
+            color: #cbd5e1;
+            flex-shrink: 0;
+        }
+        .stage-step.active .step-circle {
+            background-color: #2563eb;
+            color: #ffffff;
+            box-shadow: 0 0 6px #3b82f6;
+        }
+        .stage-step.done .step-circle {
+            background-color: #10b981;
+            color: #ffffff;
+        }
+
+        /* Mode 2 Keypad Controls */
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .btn-key {
+            padding: 8px 4px;
+            font-size: 11.5px;
+            font-weight: 800;
+            border-radius: 5px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: #f1f5f9;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            transition: all 0.12s ease;
+        }
+        .btn-key:hover {
+            background-color: #334155;
+            border-color: #64748b;
+        }
+        .btn-key:active {
+            transform: scale(0.97);
+            background-color: #2563eb;
+        }
+        .btn-key span.sub {
+            font-size: 8px;
+            font-weight: normal;
+            color: #94a3b8;
+        }
+
+        /* Number counter input */
+        .counter-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #020617;
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 3px 6px;
+        }
+        .counter-btn {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            color: #e2e8f0;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .counter-btn:hover { background-color: #334155; }
+        .counter-val {
+            font-family: monospace;
+            font-size: 13px;
+            font-weight: 800;
+            color: #38bdf8;
         }
 
         /* Scrollbar */
@@ -526,240 +856,556 @@
 <body>
 
     <div class="app-container" id="appContainer">
-        <!-- 1. Header (Fixed Height ~22px) -->
+        <!-- 1. Master Header with Tab Navigation -->
         <div class="app-header">
-            <div class="header-title">
+            <div class="header-left">
                 <span class="pulse-dot"></span>
-                <span>波動物理演示系統</span>
-                <span class="badge-version">10.0 完美鎖定版</span>
+                <span class="header-title">波動物理演示系統</span>
+                
+                <!-- Page Selector Tabs -->
+                <div class="nav-tabs">
+                    <button id="tabBtnOscilloscope" class="nav-tab-btn active">📟 連續波示波器</button>
+                    <button id="tabBtnBeadWave" class="nav-tab-btn">🖐️ 質點繩波產生器</button>
+                </div>
+
+                <!-- Sub-Mode Switcher for Tab 1 (Transverse / Longitudinal) -->
+                <div class="mode-switcher" id="oscModeSwitcher">
+                    <button id="btnModeTransverse" class="mode-btn active">🌊 橫波 (高低波)</button>
+                    <button id="btnModeLongitudinal" class="mode-btn">↔️ 縱波 (疏密波)</button>
+                </div>
             </div>
+            
             <div class="header-status">
+                <span id="pageBadge" style="color: #60a5fa; font-weight: bold;">示波器模式</span>
                 <span id="sysTime">SYS.READY</span>
             </div>
         </div>
 
-        <!-- 2. Middle Main Workspace (Canvas + Sidebar: STRICT ROW) -->
-        <div class="main-workspace">
-            
-            <!-- Left Side: Oscilloscope Screen -->
-            <div class="screen-container" id="screenContainer">
-                <canvas id="waveCanvas"></canvas>
-                
-                <!-- Fixed Overlays on Canvas -->
-                <div class="overlay-ch-labels">
-                    <div>CH1 <span class="ch1-text">■ 原波形 (MAIN)</span></div>
-                    <div id="ch2Label" style="opacity: 0; transition: opacity 0.2s;">CH2 <span class="ch2-text">■ 位移後波 (SHIFT)</span></div>
-                </div>
-                
-                <div id="legendVectors" class="overlay-legend">
-                    <div style="color: #cbd5e1; font-weight: bold;">質點運動方向</div>
-                    <div><span class="legend-up">▲</span> 向上運動</div>
-                    <div><span class="legend-down">▼</span> 向下運動</div>
-                    <div class="legend-tip">💡 點選紅點切換標示</div>
-                </div>
-
-                <!-- Prominent Scale / Unit Badge (Bottom Right) -->
-                <div class="overlay-unit-badge">
-                    <div class="unit-badge-width">
-                        <span class="dot-cyan"></span>
-                        <span>畫面寬度 = 100 cm</span>
-                    </div>
-                    <div class="unit-badge-time">
-                        <span class="dot-amber"></span>
-                        <span>時間單位 = 1.0 秒產生</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Side: Sidebar Controls (STRICT 235px WIDTH) -->
-            <div class="sidebar-controls custom-scrollbar">
-                
-                <!-- Group 1: Playback & Phase -->
-                <div class="control-group" style="flex-shrink: 0;">
-                    <div class="control-group-header">
-                        <span>系統控制 SYSTEM</span>
-                        <span id="statusIndicator" class="badge-running">RUNNING</span>
+        <!-- ======================================================== -->
+        <!-- VIEW 1: CONTINUOUS WAVE OSCILLOSCOPE                     -->
+        <!-- ======================================================== -->
+        <div class="view-content" id="viewOscilloscope">
+            <!-- Middle Workspace (Canvas + Sidebar) -->
+            <div class="oscilloscope-workspace">
+                <!-- Screen -->
+                <div class="screen-container" id="screenContainer">
+                    <canvas id="waveCanvas"></canvas>
+                    
+                    <!-- Fixed Overlays on Canvas -->
+                    <div class="overlay-ch-labels" id="overlayLabels">
+                        <div>CH1 <span class="ch1-text">■ 原波形 (MAIN)</span></div>
+                        <div id="ch2Label" style="opacity: 0; transition: opacity 0.2s;">CH2 <span class="ch2-text">■ 位移後波 (SHIFT)</span></div>
                     </div>
                     
-                    <button id="btnPlayPause" class="btn btn-blue" style="margin-bottom: 4px; letter-spacing: 0.05em;">
-                        暫停 (PAUSE)
-                    </button>
+                    <div id="legendVectors" class="overlay-legend">
+                        <div style="color: #cbd5e1; font-weight: bold;">質點運動方向</div>
+                        <div><span class="legend-up">▲</span> 向上運動</div>
+                        <div><span class="legend-down">▼</span> 向下運動</div>
+                        <div class="legend-tip">💡 點選紅點切換標示</div>
+                    </div>
+
+                    <!-- Graticule Scale Badge (Bottom Right) -->
+                    <div class="overlay-unit-badge">
+                        <div class="unit-badge-width">
+                            <span class="dot-cyan"></span>
+                            <span>坐標刻度：每大格 = 10 cm</span>
+                        </div>
+                        <div class="unit-badge-time">
+                            <span class="dot-amber"></span>
+                            <span id="unitSpeedText">波速連動：v = f × λ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Controls (300px width with 3X Enlarged Formula) -->
+                <div class="sidebar-controls custom-scrollbar">
                     
-                    <div id="shiftContainer" style="opacity: 0.4; transition: opacity 0.2s;">
-                        <div class="slider-container">
-                            <div class="slider-header">
-                                <span class="slider-label">水平位移 (虛線波)</span>
-                                <span id="valShift" class="slider-val val-emerald">0 cm</span>
-                            </div>
-                            <input type="range" id="inputShift" min="-50" max="50" step="1" value="0" disabled>
+                    <!-- Group 1: Playback & Phase Shift -->
+                    <div class="control-group" style="flex-shrink: 0;">
+                        <div class="control-group-header">
+                            <span>系統控制 SYSTEM</span>
+                            <span id="statusIndicator" class="badge-running" style="color:#34d399; font-weight:bold;">RUNNING</span>
                         </div>
                         
-                        <button id="btnVectors" class="btn btn-secondary" disabled>
-                            質點運動方向 (點選紅點)
+                        <button id="btnPlayPause" class="btn btn-blue" style="margin-bottom: 4px; letter-spacing: 0.05em;">
+                            暫停 (PAUSE)
                         </button>
-                    </div>
-                </div>
-
-                <!-- Group 2: Magnifier Controls -->
-                <div class="control-group" style="flex-shrink: 0; background-color: rgba(30, 41, 59, 0.4);">
-                    <div class="control-group-header">
-                        <span style="display: flex; align-items: center; gap: 4px;">
-                            <span>🔍</span> 局部放大鏡
-                        </span>
-                        <label class="switch-label">
-                            <input type="checkbox" id="toggleLens" class="switch-input">
-                            <span class="switch-track"></span>
-                        </label>
-                    </div>
-                    
-                    <div id="lensSidebarControls" style="opacity: 0.3; pointer-events: none; transition: opacity 0.2s; display: flex; flex-direction: column; gap: 3px;">
-                        <div class="slider-container">
-                            <div class="slider-header">
-                                <span class="slider-label">方框大小 (px)</span>
-                                <span id="valLensSize" class="slider-val val-emerald">200</span>
+                        
+                        <!-- Shift Container: visible only in Transverse wave mode -->
+                        <div id="shiftContainer" style="opacity: 0.4; transition: opacity 0.2s;">
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span class="slider-label">水平位移 (虛線波)</span>
+                                    <span id="valShift" class="slider-val val-emerald">0 cm</span>
+                                </div>
+                                <input type="range" id="inputShift" min="-50" max="50" step="1" value="0" disabled>
                             </div>
-                            <input type="range" id="lensSizeInput" min="100" max="400" step="10" value="200">
+                            
+                            <button id="btnVectors" class="btn btn-secondary" disabled>
+                                質點運動方向 (點選紅點)
+                            </button>
                         </div>
-                        <div class="slider-container">
-                            <div class="slider-header">
-                                <span class="slider-label">放大倍率 (x)</span>
-                                <span id="valLensZoom" class="slider-val val-amber">2.5</span>
-                            </div>
-                            <input type="range" id="lensZoomInput" min="1.5" max="6" step="0.1" value="2.5">
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Group 3: Monitor -->
-                <div class="control-group monitor-card">
-                    <div class="control-group-header">
-                        <span>數據監視 MONITOR</span>
-                    </div>
-                    
-                    <div class="info-panel">
-                        <div class="formula-title">波速公式 WAVE FORMULA:</div>
-                        <div class="formula-box">
-                            <span class="val-pink">v</span> = 
-                            <span class="val-amber">f</span> × 
-                            <span class="val-blue">λ</span>
+                        <!-- Longitudinal Wave Notice (shown in longitudinal mode) -->
+                        <div id="longitudinalNotice" style="display: none; font-size: 9.5px; color: #94a3b8; background-color: rgba(15, 23, 42, 0.6); padding: 5px 6px; border-radius: 4px; border: 1px dashed #475569; margin-top: 4px; line-height: 1.35;">
+                            <div style="color: #38bdf8; font-weight: bold; margin-bottom: 2px;">↔️ 縱波觀念導引：</div>
+                            質點在平衡位置左右振動形成疏密交替。波速快慢直接反映在疏密區向前推進的速度！
                         </div>
-                        <div class="equation-calc">
-                            <span id="eqV" class="val-pink" style="font-weight: bold;">50.0</span> <span style="font-size: 8px; color: #64748b;">cm/s</span> = 
-                            <span id="eqF" class="val-amber" style="font-weight: bold;">1.00</span> <span style="font-size: 8px; color: #64748b;">Hz</span> × 
-                            <span id="eqL" class="val-blue" style="font-weight: bold;">50.0</span> <span style="font-size: 8px; color: #64748b;">cm</span>
+                    </div>
+
+                    <!-- Group 2: Magnifier Controls -->
+                    <div class="control-group" style="flex-shrink: 0; background-color: rgba(30, 41, 59, 0.4);">
+                        <div class="control-group-header">
+                            <span style="display: flex; align-items: center; gap: 4px;">
+                                <span>🔍</span> 局部放大鏡
+                            </span>
+                            <label class="switch-label">
+                                <input type="checkbox" id="toggleLens" class="switch-input">
+                                <span class="switch-track"></span>
+                            </label>
                         </div>
                         
-                        <div class="divider"></div>
-                        
-                        <div class="stat-row">
-                            <span class="stat-label">頻率 (f)</span>
-                            <span id="infoFreq" class="stat-val val-amber">1.00 Hz</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">波長 (λ)</span>
-                            <span id="infoLambda" class="stat-val val-blue">50.0 cm</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">波速 (v)</span>
-                            <span id="infoSpeed" class="stat-val val-pink">50.0 cm/s</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">週期 (T)</span>
-                            <span id="infoT" class="stat-val" style="color: #cbd5e1;">1.00 s</span>
+                        <div id="lensSidebarControls" style="opacity: 0.3; pointer-events: none; transition: opacity 0.2s; display: flex; flex-direction: column; gap: 3px;">
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span class="slider-label">方框大小 (px)</span>
+                                    <span id="valLensSize" class="slider-val val-emerald">200</span>
+                                </div>
+                                <input type="range" id="lensSizeInput" min="100" max="400" step="10" value="200">
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-header">
+                                    <span class="slider-label">放大倍率 (x)</span>
+                                    <span id="valLensZoom" class="slider-val val-amber">2.5</span>
+                                </div>
+                                <input type="range" id="lensZoomInput" min="1.5" max="6" step="0.1" value="2.5">
+                            </div>
                         </div>
                     </div>
-                </div>
 
+                    <!-- Group 3: Monitor (3X Enlarged Formula for Classroom Projection) -->
+                    <div class="control-group monitor-card">
+                        <div class="control-group-header">
+                            <span>數據監視 MONITOR</span>
+                            <span style="font-size: 8px; color: #38bdf8;">教室特大字體</span>
+                        </div>
+                        
+                        <div class="info-panel">
+                            <div class="formula-title">波速公式：</div>
+                            
+                            <!-- 3X ENLARGED FORMULA (42px) -->
+                            <div class="formula-box">
+                                <span class="val-pink">v</span>
+                                <span style="color: #cbd5e1; font-weight: 300;">=</span>
+                                <span class="val-amber">f</span>
+                                <span style="color: #cbd5e1; font-weight: 300;">×</span>
+                                <span class="val-blue">λ</span>
+                            </div>
+                            
+                            <!-- 3X ENLARGED CALCULATION BOX (30px numbers) -->
+                            <div class="equation-calc">
+                                <div class="eq-num-row">
+                                    <span id="eqV" class="val-pink eq-num">50.0</span>
+                                    <span class="eq-op">=</span>
+                                    <span id="eqF" class="val-amber eq-num">1.00</span>
+                                    <span class="eq-op">×</span>
+                                    <span id="eqL" class="val-blue eq-num">50.0</span>
+                                </div>
+                                <div class="eq-unit-row">
+                                    <span style="color: #f472b6;">cm/s (波速)</span>
+                                    <span style="color: #64748b;">=</span>
+                                    <span style="color: #fbbf24;">Hz (頻率)</span>
+                                    <span style="color: #64748b;">×</span>
+                                    <span style="color: #38bdf8;">cm (波長)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="divider"></div>
+                            
+                            <div class="stat-row">
+                                <span class="stat-label">波速 (v)</span>
+                                <span id="infoSpeed" class="stat-val val-pink">50.0 cm/s</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">頻率 (f)</span>
+                                <span id="infoFreq" class="stat-val val-amber">1.00 Hz</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">波長 (λ)</span>
+                                <span id="infoLambda" class="stat-val val-blue">50.0 cm</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-label">週期 (T)</span>
+                                <span id="infoT" class="stat-val" style="color: #cbd5e1;">1.00 s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom Parameter Bar: 主控 f 與 λ，連動 v = f × λ -->
+            <div class="bottom-panel">
+                <div class="bottom-panel-header">
+                    <span class="bottom-title">參數調整 PARAMETERS (調整頻率或波長，波速 v 與畫面推進速度立即同步改變)</span>
+                    <span class="bottom-subtitle">核心公式：v = f × λ</span>
+                </div>
+                <div class="parameters-grid">
+                    
+                    <!-- Parameter 1: 頻率 (f) - 主控 -->
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" style="color: #cbd5e1; font-weight:bold;">頻率 (f) [主控]</span>
+                            <span id="valFreq" class="slider-val val-amber">1.00 Hz</span>
+                        </div>
+                        <input type="range" id="inputFreq" min="0.25" max="4.00" step="0.25" value="1.00">
+                        <div class="slider-scale">
+                            <span>0.25 Hz (慢)</span>
+                            <span>4.00 Hz (快)</span>
+                        </div>
+                    </div>
+
+                    <!-- Parameter 2: 波長 (λ) - 主控 -->
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" style="color: #cbd5e1; font-weight:bold;">波長 (λ) [主控]</span>
+                            <span id="valLambda" class="slider-val val-blue">50.0 cm</span>
+                        </div>
+                        <input type="range" id="inputLambda" min="15" max="150" step="5" value="50">
+                        <div class="slider-scale">
+                            <span>15 cm (短波)</span>
+                            <span>150 cm (長波)</span>
+                        </div>
+                    </div>
+
+                    <!-- Parameter 3: 波速 (v) - 計算連動 -->
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" style="color: #f472b6; font-weight:bold;">波速 (v = f × λ)</span>
+                            <span id="valSpeed" class="slider-val val-pink">50 cm/s</span>
+                        </div>
+                        <input type="range" id="inputSpeed" min="10" max="300" step="5" value="50">
+                        <div class="slider-scale">
+                            <span>10 cm/s</span>
+                            <span>300 cm/s</span>
+                        </div>
+                    </div>
+
+                    <!-- Parameter 4: 震幅 (A) -->
+                    <div class="slider-container">
+                        <div class="slider-header">
+                            <span class="slider-label" style="color: #cbd5e1;">震幅 (A)</span>
+                            <span id="valAmp" class="slider-val val-emerald">10 cm</span>
+                        </div>
+                        <input type="range" id="inputAmp" min="2" max="15" step="1" value="10">
+                        <div class="slider-scale">
+                            <span>2 cm</span>
+                            <span>15 cm</span>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
 
-        <!-- 3. Bottom Layout: Parameters (STRICT 3 COLUMNS, NEVER VERTICAL) -->
-        <div class="bottom-panel">
-            <div class="bottom-panel-header">
-                <span class="bottom-title">參數調整 PARAMETERS</span>
-                <span class="bottom-subtitle">100 cm 實體寬度 ｜ 1秒基準波</span>
+        <!-- ======================================================== -->
+        <!-- VIEW 2: BEAD STRING WAVE GENERATOR (質點繩波產生器)        -->
+        <!-- ======================================================== -->
+        <div class="view-content" id="viewBeadWave" style="display: none;">
+            <!-- Top Toolbar for Bead Wave -->
+            <div class="bead-top-toolbar">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">教學模式：</span>
+                    <div class="mode-switcher">
+                        <button id="btnBeadMode1" class="mode-btn active">⚡ 模式一：四段甩動示範 (1個全波)</button>
+                        <button id="btnBeadMode2" class="mode-btn">🎮 模式二：自選/上下鍵甩動</button>
+                    </div>
+                </div>
+
+                <div class="toolbar-group">
+                    <span class="toolbar-label">握持端點：</span>
+                    <div class="mode-switcher">
+                        <button id="btnHandLeft" class="mode-btn active">🖐️ 左端手持 (波向右傳)</button>
+                        <button id="btnHandRight" class="mode-btn">🖐️ 右端手持 (波向左傳)</button>
+                    </div>
+                </div>
+
+                <div class="toolbar-group">
+                    <span class="toolbar-label">畫布風格：</span>
+                    <button id="btnToggleBeadTheme" class="mode-btn" style="background:#334155; color:#cbd5e1;">📜 典雅教材風</button>
+                    <button id="btnResetBeads" class="mode-btn" style="background:#b91c1c; color:#fff;">🔄 重設直線</button>
+                </div>
             </div>
-            <div class="parameters-grid">
-                
-                <!-- Parameter 1: 頻率 (f) -->
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" style="color: #cbd5e1;">頻率 (f)</span>
-                        <span id="valFreq" class="slider-val val-amber">1.00 Hz</span>
+
+            <!-- Workspace: Canvas + Sidebar -->
+            <div class="bead-workspace">
+                <!-- Canvas Screen -->
+                <div class="bead-canvas-container" id="beadCanvasContainer">
+                    <canvas id="beadCanvas"></canvas>
+                    
+                    <!-- HUD Top Left -->
+                    <div class="bead-hud">
+                        <div class="bead-hud-title" id="beadHudTitle">模式一：四段甩動生成 1 個全波</div>
+                        <div class="bead-hud-stage" id="beadHudStage">準備就緒：請按下「開始甩動」或「單步執行」</div>
+                        <div class="bead-hud-desc" id="beadHudDesc">質點排成水平直線，一隻手抓著端點質點。</div>
                     </div>
-                    <input type="range" id="inputFreq" min="0.25" max="4.00" step="0.25" value="1.00">
-                    <div class="slider-scale">
-                        <span>0.25 Hz</span>
-                        <span>4.00 Hz</span>
+
+                    <!-- HUD Top Right -->
+                    <div class="bead-hud-right">
+                        <div>波傳播方向：<span id="hudDirText" style="color: #38bdf8; font-weight: bold;">➡️ 向右傳播</span></div>
+                        <div>端點位移：<span id="hudDispText" style="color: #facc15; font-family: monospace; font-weight: bold;">0.0 A</span></div>
+                        <div>波速狀態：<span id="hudSpeedText" style="color: #34d399; font-family: monospace;">v = 140 px/s</span></div>
                     </div>
                 </div>
 
-                <!-- Parameter 2: 波長 (λ) -->
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" style="color: #cbd5e1;">波長 (λ)</span>
-                        <span id="valLambda" class="slider-val val-blue">50.0 cm</span>
-                    </div>
-                    <input type="range" id="inputLambda" min="20" max="100" step="5" value="50">
-                    <div class="slider-scale">
-                        <span>20 cm (短波)</span>
-                        <span>100 cm (長波)</span>
-                    </div>
-                </div>
+                <!-- Sidebar for Bead Wave -->
+                <div class="bead-sidebar custom-scrollbar">
+                    
+                    <!-- Panel for Mode 1 -->
+                    <div class="control-group" id="beadMode1Panel">
+                        <div class="control-group-header">
+                            <span>四段甩動教學 STAGE DEMO</span>
+                            <span class="val-amber" style="font-size: 9px;">4A = 1全波</span>
+                        </div>
 
-                <!-- Parameter 3: 震幅 (A) -->
-                <div class="slider-container">
-                    <div class="slider-header">
-                        <span class="slider-label" style="color: #cbd5e1;">震幅 (A)</span>
-                        <span id="valAmp" class="slider-val val-emerald">10 cm</span>
-                    </div>
-                    <input type="range" id="inputAmp" min="2" max="20" step="1" value="10">
-                    <div class="slider-scale">
-                        <span>2 cm</span>
-                        <span>20 cm</span>
-                    </div>
-                </div>
+                        <button id="btnStartFourStages" class="btn btn-emerald" style="padding: 7px 0; font-size: 12px; margin-top: 2px;">
+                            ▶ 連續播放 4 段示範
+                        </button>
 
+                        <div style="display: flex; gap: 4px;">
+                            <button id="btnStepBead" class="btn btn-blue" style="flex: 1.2; font-size: 11.5px; padding: 6px 0;">
+                                ⏭ 單步執行 (動完定格)
+                            </button>
+                            <button id="btnPauseBead" class="btn btn-secondary" style="flex: 0.8;">
+                                ⏸ 暫停
+                            </button>
+                        </div>
+
+                        <div class="divider" style="margin: 4px 0;"></div>
+
+                        <!-- 4-Stage Stepper Display -->
+                        <div class="stage-stepper">
+                            <div class="stage-step" id="step1">
+                                <span class="step-circle">1</span>
+                                <div>
+                                    <div style="font-weight: bold;">第 1 段：手向上甩 (0 → +A)</div>
+                                    <div style="font-size: 8px; opacity: 0.8;">位移 1A，形成 1/4 波</div>
+                                </div>
+                            </div>
+                            <div class="stage-step" id="step2">
+                                <span class="step-circle">2</span>
+                                <div>
+                                    <div style="font-weight: bold;">第 2 段：手向下甩 (+A → 0)</div>
+                                    <div style="font-size: 8px; opacity: 0.8;">位移 1A (累計 2A)，波峰完成</div>
+                                </div>
+                            </div>
+                            <div class="stage-step" id="step3">
+                                <span class="step-circle">3</span>
+                                <div>
+                                    <div style="font-weight: bold;">第 3 段：手向下甩 (0 → -A)</div>
+                                    <div style="font-size: 8px; opacity: 0.8;">位移 1A (累計 3A)，形成 3/4 波</div>
+                                </div>
+                            </div>
+                            <div class="stage-step" id="step4">
+                                <span class="step-circle">4</span>
+                                <div>
+                                    <div style="font-weight: bold;">第 4 段：手向上甩 (-A → 0)</div>
+                                    <div style="font-size: 8px; opacity: 0.8;">位移 1A (累計 4A)，全波完成！</div>
+                                </div>
+                            </div>
+                            <div class="stage-step" id="stepPropagate">
+                                <span class="step-circle">➔</span>
+                                <div>
+                                    <div style="font-weight: bold;">波形持續向前推進傳播</div>
+                                    <div style="font-size: 8px; opacity: 0.8;">波穿出另一端邊界後消失</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel for Mode 2 -->
+                    <div class="control-group" id="beadMode2Panel" style="display: none;">
+                        <div class="control-group-header">
+                            <span>手動控制甩動次數 (上下鍵)</span>
+                            <span class="val-blue" style="font-size: 9px;">鍵盤 ↑ / ↓</span>
+                        </div>
+
+                        <!-- Instant Manual Shaking Buttons -->
+                        <div class="keypad-grid" style="margin-top: 2px;">
+                            <button id="btnKeyUp" class="btn-key">
+                                <span style="font-size: 16px; color: #fbbf24;">▲</span>
+                                <span>向上甩 (+1A)</span>
+                                <span class="sub">鍵盤 [↑] 鍵</span>
+                            </button>
+                            <button id="btnKeyDown" class="btn-key">
+                                <span style="font-size: 16px; color: #e879f9;">▼</span>
+                                <span>向下甩 (-1A)</span>
+                                <span class="sub">鍵盤 [↓] 鍵</span>
+                            </button>
+                        </div>
+
+                        <div class="divider" style="margin: 4px 0;"></div>
+
+                        <!-- Count Selection and Confirm Button -->
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">自選甩動次數 (振幅數)：</span>
+                                <span id="valTargetShakes" class="slider-val val-emerald">4 次 (1全波)</span>
+                            </div>
+                            
+                            <div class="counter-box">
+                                <button id="btnMinusShakes" class="counter-btn">-</button>
+                                <div class="counter-val" id="counterShakeDisplay">4 次振幅 (1.0波)</div>
+                                <button id="btnPlusShakes" class="counter-btn">+</button>
+                            </div>
+                        </div>
+
+                        <button id="btnConfirmShakeCount" class="btn btn-blue" style="margin-top: 4px; padding: 7px 0; font-size: 12px;">
+                            ✔ 確定甩動 (Enter)
+                        </button>
+
+                        <div style="font-size: 8.5px; color: #94a3b8; line-height: 1.4; background: rgba(15,23,42,0.6); padding: 5px; border-radius: 4px; border: 1px dashed #475569; margin-top: 4px;">
+                            💡 <b>操作說明：</b><br>
+                            1. 直接按鍵盤 <b>↑ / ↓ 鍵</b>，手會立即跟隨上下移動 1 個振幅帶動繩波！<br>
+                            2. 或按 <b>+ / -</b> 設定次數後，按 <b>Enter</b> 確定連續甩動！
+                        </div>
+                    </div>
+
+                    <!-- Parameter Adjustments for Bead String -->
+                    <div class="control-group">
+                        <div class="control-group-header">
+                            <span>繩波物理參數 STRING PARAMS</span>
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">振幅 (A)</span>
+                                <span id="valBeadAmp" class="slider-val val-emerald">75 px</span>
+                            </div>
+                            <input type="range" id="inputBeadAmp" min="40" max="110" step="5" value="75">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">波傳播速度 (v)</span>
+                                <span id="valBeadSpeed" class="slider-val val-pink">140 px/s</span>
+                            </div>
+                            <input type="range" id="inputBeadSpeed" min="60" max="240" step="10" value="140">
+                            <div class="slider-scale">
+                                <span>60 px/s (慢)</span>
+                                <span>240 px/s (快)</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-header">
+                                <span class="slider-label">手甩動動作速度</span>
+                                <span id="valShakeSpeed" class="slider-val val-amber">1.0x</span>
+                            </div>
+                            <input type="range" id="inputShakeSpeed" min="0.5" max="2.0" step="0.25" value="1.0">
+                        </div>
+                    </div>
+
+                    <!-- Educational Concept Card -->
+                    <div class="control-group" style="background: rgba(15, 23, 42, 0.7); flex: 1;">
+                        <div class="control-group-header">
+                            <span>理化觀念重點 KEY CONCEPT</span>
+                        </div>
+                        <div style="font-size: 9.5px; color: #cbd5e1; line-height: 1.45; display: flex; flex-direction: column; gap: 4px;">
+                            <div>• <b>波的產生</b>：振動質點透過彈性拉力將擾動傳遞給相鄰質點。</div>
+                            <div>• <b>1 個全波</b>：質點經歷 <b>4 個振幅位移</b>（上、回、下、回）。</div>
+                            <div>• <b>介質不隨波遷移</b>：每個質點只在各自的平衡位置上下振動，往前傳遞的是「能量與波形」！</div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
+
     </div>
 
     <script>
+        // ========================================================
+        // TAB SWITCHING LOGIC (示波器 vs 質點繩波)
+        // ========================================================
+        let currentTab = 'oscilloscope'; // 'oscilloscope' or 'beadwave'
+        const tabBtnOscilloscope = document.getElementById('tabBtnOscilloscope');
+        const tabBtnBeadWave = document.getElementById('tabBtnBeadWave');
+        const viewOscilloscope = document.getElementById('viewOscilloscope');
+        const viewBeadWave = document.getElementById('viewBeadWave');
+        const oscModeSwitcher = document.getElementById('oscModeSwitcher');
+        const pageBadge = document.getElementById('pageBadge');
+
+        tabBtnOscilloscope.addEventListener('click', () => {
+            currentTab = 'oscilloscope';
+            tabBtnOscilloscope.classList.add('active');
+            tabBtnBeadWave.classList.remove('active');
+            viewOscilloscope.style.display = 'flex';
+            viewBeadWave.style.display = 'none';
+            oscModeSwitcher.style.display = 'flex';
+            pageBadge.textContent = '示波器模式';
+            pageBadge.style.color = '#60a5fa';
+            resize();
+            draw();
+        });
+
+        tabBtnBeadWave.addEventListener('click', () => {
+            currentTab = 'beadwave';
+            tabBtnBeadWave.classList.add('active');
+            tabBtnOscilloscope.classList.remove('active');
+            viewBeadWave.style.display = 'flex';
+            viewOscilloscope.style.display = 'none';
+            oscModeSwitcher.style.display = 'none';
+            pageBadge.textContent = '質點繩波模式';
+            pageBadge.style.color = '#34d399';
+            resizeBeadCanvas();
+            drawBeadScene();
+        });
+
+        // ========================================================
+        // MODULE 1: CONTINUOUS WAVE OSCILLOSCOPE LOGIC
+        // ========================================================
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         const screenContainer = document.getElementById('screenContainer');
         const appContainer = document.getElementById('appContainer');
 
-        const W_cm = 100; // Physical width is 100 cm
+        const CM_PER_GRID = 10;
+        let visibleWidth_cm = 120; 
 
+        let currentMode = 'transverse'; // 'transverse' or 'longitudinal'
         let isPlaying = true;
         let showVectors = false; 
         let time = 0;
         let lastFrameTime = performance.now();
 
-        // Magnifier (Lens) state
+        // Lens state
         let lensActive = false;
         let lensX = 0;
         let lensY = 0;
         let lensSize = 200;
         let lensZoom = 2.5;
 
-        // Interactive Selected Particles (Only show vector on clicked red dots)
+        // Selected Particles for vector
         const selectedParticles = new Set();
 
-        // Parameters
-        let freq_hz = 1.00;    // f (Hz)
-        let lambda_cm = 50.0;  // λ (cm)
+        // Physical Parameters (v = f * λ)
+        let freq_hz = 1.00;    // f (Hz) [Primary]
+        let lambda_cm = 50.0;  // λ (cm) [Primary]
+        let waveSpeed = 50.0;  // v = f * λ (cm/s)
         let amp_cm = 10;       // A (cm)
         let shiftX_cm = 0;     // cm
-        let waveSpeed = 50.0;  // v = f * λ (cm/s)
-        let numWaves = 2.0;    // N = 100 / λ
 
+        // Oscilloscope DOM references
+        const btnModeTransverse = document.getElementById('btnModeTransverse');
+        const btnModeLongitudinal = document.getElementById('btnModeLongitudinal');
         const btnPlayPause = document.getElementById('btnPlayPause');
         const btnVectors = document.getElementById('btnVectors');
         const legendVectors = document.getElementById('legendVectors');
+        const shiftContainer = document.getElementById('shiftContainer');
+        const longitudinalNotice = document.getElementById('longitudinalNotice');
+        const overlayLabels = document.getElementById('overlayLabels');
         
-        // Lens UI in Sidebar
         const toggleLens = document.getElementById('toggleLens');
         const lensSidebarControls = document.getElementById('lensSidebarControls');
         const lensSizeInput = document.getElementById('lensSizeInput');
@@ -767,7 +1413,8 @@
         const valLensSize = document.getElementById('valLensSize');
         const valLensZoom = document.getElementById('valLensZoom');
         
-        // Parameters Inputs
+        const inputSpeed = document.getElementById('inputSpeed');
+        const valSpeed = document.getElementById('valSpeed');
         const inputFreq = document.getElementById('inputFreq');
         const valFreq = document.getElementById('valFreq');
         const inputLambda = document.getElementById('inputLambda');
@@ -776,11 +1423,9 @@
         const valAmp = document.getElementById('valAmp');
         const inputShift = document.getElementById('inputShift');
         const valShift = document.getElementById('valShift');
-        const shiftContainer = document.getElementById('shiftContainer');
         const statusIndicator = document.getElementById('statusIndicator');
         const ch2Label = document.getElementById('ch2Label');
 
-        // Monitor elements
         const infoLambda = document.getElementById('infoLambda');
         const infoFreq = document.getElementById('infoFreq');
         const infoSpeed = document.getElementById('infoSpeed');
@@ -788,20 +1433,41 @@
         const eqV = document.getElementById('eqV');
         const eqF = document.getElementById('eqF');
         const eqL = document.getElementById('eqL');
+        const unitSpeedText = document.getElementById('unitSpeedText');
 
-        // ==== Viewport Height Fix for Tablet / Mobile Browsers ====
+        // Mode switchers
+        btnModeTransverse.addEventListener('click', () => {
+            currentMode = 'transverse';
+            btnModeTransverse.classList.add('active');
+            btnModeLongitudinal.classList.remove('active');
+            shiftContainer.style.display = 'block';
+            longitudinalNotice.style.display = 'none';
+            overlayLabels.style.display = 'flex';
+            legendVectors.style.display = showVectors ? 'flex' : 'none';
+            draw();
+        });
+
+        btnModeLongitudinal.addEventListener('click', () => {
+            currentMode = 'longitudinal';
+            btnModeLongitudinal.classList.add('active');
+            btnModeTransverse.classList.remove('active');
+            shiftContainer.style.display = 'none';
+            longitudinalNotice.style.display = 'block';
+            overlayLabels.style.display = 'none';
+            legendVectors.style.display = 'none';
+            draw();
+        });
+
         function syncAppHeight() {
             if (appContainer) {
                 appContainer.style.height = `${window.innerHeight}px`;
             }
             resize();
+            resizeBeadCanvas();
         }
         window.addEventListener('resize', syncAppHeight);
-        window.addEventListener('orientationchange', () => {
-            setTimeout(syncAppHeight, 150);
-        });
 
-        // ==== Lens Controls ====
+        // Lens
         toggleLens.addEventListener('change', (e) => {
             lensActive = e.target.checked;
             if (lensActive) {
@@ -828,11 +1494,12 @@
             if(!isPlaying) draw();
         });
 
-        // Pointermove for Mouse and Touch on Canvas
         function handlePointerMove(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
-            const posX = clientX - rect.left;
-            const posY = clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const posX = (clientX - rect.left) * scaleX;
+            const posY = (clientY - rect.top) * scaleY;
 
             if (lensActive) {
                 lensX = posX;
@@ -840,27 +1507,27 @@
                 if (!isPlaying) draw();
             }
 
-            if (!isPlaying && showVectors) {
-                const totalParticles = Math.floor(numWaves * 12);
+            if (currentMode === 'transverse' && !isPlaying) {
+                const totalParticles = 40;
                 const k_cm = 2 * Math.PI / lambda_cm;
                 const omega = 2 * Math.PI * freq_hz;
                 const centerY = canvas.height / 2;
-                let nearDot = false;
 
+                let hovered = false;
                 for (let i = 0; i <= totalParticles; i++) {
-                    const x_cm = i * (W_cm / totalParticles);
+                    const x_cm = i * (visibleWidth_cm / totalParticles);
                     const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
                     const px = cmToPx(x_cm);
                     const py = centerY - cmToPx(y_cm);
                     const dist = Math.hypot(posX - px, posY - py);
-                    if (dist <= 16) {
-                        nearDot = true;
+                    if (dist <= 15) {
+                        hovered = true;
                         break;
                     }
                 }
-                canvas.style.cursor = nearDot ? 'pointer' : (lensActive ? 'crosshair' : 'default');
+                canvas.style.cursor = hovered ? 'pointer' : 'default';
             } else {
-                canvas.style.cursor = lensActive ? 'crosshair' : 'default';
+                canvas.style.cursor = 'default';
             }
         }
 
@@ -868,45 +1535,52 @@
         canvas.addEventListener('touchmove', (e) => {
             if (e.touches.length > 0) {
                 handlePointerMove(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
             }
-        }, { passive: true });
+        }, { passive: false });
 
-        // Pointer click / touch for Particle Selection (NO Play/Pause on canvas)
         function handleSelectParticle(clientX, clientY) {
-            if (!isPlaying && showVectors) {
-                const rect = canvas.getBoundingClientRect();
-                const posX = clientX - rect.left;
-                const posY = clientY - rect.top;
+            if (isPlaying || currentMode !== 'transverse') return;
 
-                const totalParticles = Math.floor(numWaves * 12);
-                const k_cm = 2 * Math.PI / lambda_cm;
-                const omega = 2 * Math.PI * freq_hz;
-                const centerY = canvas.height / 2;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const posX = (clientX - rect.left) * scaleX;
+            const posY = (clientY - rect.top) * scaleY;
 
-                let clickedIndex = -1;
-                let minDist = 22; // 22px touch target
+            const totalParticles = 40;
+            const k_cm = 2 * Math.PI / lambda_cm;
+            const omega = 2 * Math.PI * freq_hz;
+            const centerY = canvas.height / 2;
 
-                for (let i = 0; i <= totalParticles; i++) {
-                    const x_cm = i * (W_cm / totalParticles);
-                    const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
-                    const px = cmToPx(x_cm);
-                    const py = centerY - cmToPx(y_cm);
-                    const dist = Math.hypot(posX - px, posY - py);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        clickedIndex = i;
-                    }
+            let closestIndex = -1;
+            let minDist = 22; 
+
+            for (let i = 0; i <= totalParticles; i++) {
+                const x_cm = i * (visibleWidth_cm / totalParticles);
+                const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
+                const px = cmToPx(x_cm);
+                const py = centerY - cmToPx(y_cm);
+                const dist = Math.hypot(posX - px, posY - py);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closestIndex = i;
                 }
+            }
 
-                if (clickedIndex !== -1) {
-                    if (selectedParticles.has(clickedIndex)) {
-                        selectedParticles.delete(clickedIndex);
-                    } else {
-                        selectedParticles.add(clickedIndex);
-                    }
-                    updateVectorsButton();
-                    draw();
+            if (closestIndex !== -1) {
+                if (selectedParticles.has(closestIndex)) {
+                    selectedParticles.delete(closestIndex);
+                } else {
+                    selectedParticles.add(closestIndex);
                 }
+                if (selectedParticles.size > 0 && !showVectors) {
+                    showVectors = true;
+                } else if (selectedParticles.size === 0 && showVectors) {
+                    showVectors = false;
+                }
+                updateVectorsButton();
+                draw();
             }
         }
 
@@ -917,49 +1591,33 @@
             }
         });
 
-        // ==== ABSOLUTE 21:9 FIT-CONTAIN RESIZE LOGIC ====
         function resize() {
             if (!screenContainer) return;
-            const availW = screenContainer.clientWidth - 4; 
-            const availH = screenContainer.clientHeight - 4;
-            
-            if (availW <= 0 || availH <= 0) return;
-
-            let targetW = availW;
-            let targetH = targetW * (9 / 21);
-
-            if (targetH > availH) {
-                targetH = availH;
-                targetW = targetH * (21 / 9);
-            }
-
-            canvas.width = Math.floor(targetW);
-            canvas.height = Math.floor(targetH);
-            canvas.style.margin = "auto";
-
+            const rect = screenContainer.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            visibleWidth_cm = 120;
             if(!isPlaying) draw();
         }
-        
-        // ==== Core Logic ====
-        function updateInfo() {
-            waveSpeed = freq_hz * lambda_cm;
-            numWaves = W_cm / lambda_cm;
 
+        // ==== DYNAMIC WAVE SPEED & FORMULA COUPLING (v = f * λ) ====
+        function updateInfo() {
+            infoSpeed.textContent = waveSpeed.toFixed(1) + ' cm/s';
             infoFreq.textContent = freq_hz.toFixed(2) + ' Hz';
             infoLambda.textContent = lambda_cm.toFixed(1) + ' cm';
-            infoSpeed.textContent = waveSpeed.toFixed(1) + ' cm/s';
-            infoT.textContent = (freq_hz > 0 ? (1 / freq_hz).toFixed(2) : '∞') + ' s';
+            infoT.textContent = (1 / freq_hz).toFixed(2) + ' s';
 
             eqV.textContent = waveSpeed.toFixed(1);
             eqF.textContent = freq_hz.toFixed(2);
             eqL.textContent = lambda_cm.toFixed(1);
+
+            unitSpeedText.textContent = `波速連動：v = ${waveSpeed.toFixed(0)} cm/s`;
         }
 
         function updateUI() {
-            freq_hz = parseFloat(inputFreq.value);
+            valSpeed.textContent = waveSpeed.toFixed(0) + ' cm/s';
             valFreq.textContent = freq_hz.toFixed(2) + ' Hz';
-
-            lambda_cm = parseFloat(inputLambda.value);
             valLambda.textContent = lambda_cm.toFixed(1) + ' cm';
             
             amp_cm = parseFloat(inputAmp.value);
@@ -982,7 +1640,7 @@
                 selectedParticles.clear();
                 
                 statusIndicator.textContent = 'RUNNING';
-                statusIndicator.className = 'badge-running';
+                statusIndicator.style.color = '#34d399';
                 ch2Label.style.opacity = '0';
                 legendVectors.style.opacity = '0';
             } else {
@@ -993,11 +1651,40 @@
                 btnVectors.disabled = false;
                 
                 statusIndicator.textContent = 'PAUSED';
-                statusIndicator.className = 'badge-paused';
-                ch2Label.style.opacity = '1';
+                statusIndicator.style.color = '#fbbf24';
+                if (currentMode === 'transverse' && shiftX_cm !== 0) {
+                    ch2Label.style.opacity = '1';
+                }
             }
             updateInfo();
         }
+
+        // 1. Changing Frequency (f): Updates v = f * λ (speed immediately changes visually!)
+        inputFreq.addEventListener('input', () => {
+            freq_hz = parseFloat(inputFreq.value);
+            waveSpeed = freq_hz * lambda_cm;
+            inputSpeed.value = waveSpeed;
+            updateUI();
+            if(!isPlaying) draw();
+        });
+
+        // 2. Changing Wavelength (λ): Updates v = f * λ (speed immediately changes visually!)
+        inputLambda.addEventListener('input', () => {
+            lambda_cm = parseFloat(inputLambda.value);
+            waveSpeed = freq_hz * lambda_cm;
+            inputSpeed.value = waveSpeed;
+            updateUI();
+            if(!isPlaying) draw();
+        });
+
+        // 3. Changing Wave Speed (v): Updates λ = v / f
+        inputSpeed.addEventListener('input', () => {
+            waveSpeed = parseFloat(inputSpeed.value);
+            lambda_cm = waveSpeed / freq_hz;
+            inputLambda.value = lambda_cm;
+            updateUI();
+            if(!isPlaying) draw();
+        });
 
         btnPlayPause.addEventListener('click', () => {
             isPlaying = !isPlaying;
@@ -1016,11 +1703,15 @@
                 btnVectors.classList.add('btn-active-vectors');
                 const count = selectedParticles.size;
                 btnVectors.textContent = count > 0 ? `關閉方向 (已選 ${count} 點)` : '關閉質點運動方向';
-                legendVectors.style.opacity = '1';
+                if (currentMode === 'transverse') {
+                    legendVectors.style.display = 'flex';
+                    legendVectors.style.opacity = '1';
+                }
             } else {
                 btnVectors.classList.remove('btn-active-vectors');
                 btnVectors.textContent = '質點運動方向 (點選紅點)';
                 legendVectors.style.opacity = '0';
+                legendVectors.style.display = 'none';
             }
         }
 
@@ -1034,33 +1725,30 @@
             draw();
         });
 
-        inputFreq.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
-        inputLambda.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
         inputAmp.addEventListener('input', () => { updateUI(); if(!isPlaying) draw(); });
         inputShift.addEventListener('input', () => { updateUI(); draw(); });
 
         function cmToPx(cm) {
-            return cm * (canvas.width / W_cm);
+            return cm * (canvas.width / visibleWidth_cm);
         }
 
-        function drawGraticule() {
+        function drawGraticule(centerYOverride) {
             const W = canvas.width;
             const H = canvas.height;
-            const centerY = H / 2;
+            const centerY = centerYOverride !== undefined ? centerYOverride : H / 2;
             
             ctx.beginPath();
             ctx.strokeStyle = '#1e3a8a'; 
             ctx.lineWidth = 1;
             ctx.setLineDash([]);
             
-            for(let x_cm = 10; x_cm < W_cm; x_cm += 10) {
+            for(let x_cm = CM_PER_GRID; x_cm < visibleWidth_cm; x_cm += CM_PER_GRID) {
                 let px = cmToPx(x_cm);
                 ctx.moveTo(px, 0);
                 ctx.lineTo(px, H);
             }
             
-            const max_y_cm = (H / 2) / (canvas.width / W_cm);
-
+            const max_y_cm = (H / 2) / (canvas.width / visibleWidth_cm);
             for(let y_cm = 5; y_cm <= max_y_cm; y_cm += 5) {
                 let py1 = centerY - cmToPx(y_cm);
                 let py2 = centerY + cmToPx(y_cm);
@@ -1069,34 +1757,36 @@
             }
             ctx.stroke();
 
+            // Central Main Axes
             ctx.beginPath();
             ctx.strokeStyle = '#3b82f6';
             ctx.lineWidth = 1.5;
             ctx.moveTo(0, centerY);
             ctx.lineTo(W, centerY);
-            ctx.moveTo(cmToPx(50), 0);
-            ctx.lineTo(cmToPx(50), H);
+            ctx.moveTo(cmToPx(visibleWidth_cm / 2), 0);
+            ctx.lineTo(cmToPx(visibleWidth_cm / 2), H);
             ctx.stroke();
 
+            // Ruler Ticks
             ctx.beginPath();
             ctx.lineWidth = 1;
-            for(let x_cm = 0; x_cm <= W_cm; x_cm += 1) {
+            for(let x_cm = 0; x_cm <= visibleWidth_cm; x_cm += 1) {
                 let px = cmToPx(x_cm);
-                let tickH = (x_cm % 10 === 0) ? 5 : (x_cm % 5 === 0 ? 3 : 2);
+                let tickH = (x_cm % 10 === 0) ? 6 : (x_cm % 5 === 0 ? 3.5 : 2);
                 ctx.moveTo(px, centerY - tickH);
                 ctx.lineTo(px, centerY + tickH);
             }
-            for(let y_cm = 0; y_cm <= max_y_cm; y_cm += 1) {
-                let py1 = centerY - cmToPx(y_cm);
-                let py2 = centerY + cmToPx(y_cm);
-                let tickW = (y_cm % 10 === 0) ? 5 : (y_cm % 5 === 0 ? 3 : 2);
-                ctx.moveTo(cmToPx(50) - tickW, py1); ctx.lineTo(cmToPx(50) + tickW, py1);
-                ctx.moveTo(cmToPx(50) - tickW, py2); ctx.lineTo(cmToPx(50) + tickW, py2);
-            }
             ctx.stroke();
+
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            for(let x_cm = 20; x_cm < visibleWidth_cm; x_cm += 20) {
+                ctx.fillText(x_cm + 'cm', cmToPx(x_cm), centerY + 14);
+            }
         }
 
-        function drawWave(t, dx_cm, isDashed, color, glow) {
+        function drawTransverseWave(t, dx_cm, isDashed, color, glow) {
             const W = canvas.width;
             const centerY = canvas.height / 2;
             const k_cm = 2 * Math.PI / lambda_cm;
@@ -1120,7 +1810,7 @@
             }
 
             const step_cm = 0.2; 
-            for (let x_cm = 0; x_cm <= W_cm; x_cm += step_cm) {
+            for (let x_cm = 0; x_cm <= visibleWidth_cm; x_cm += step_cm) {
                 const y_cm = amp_cm * Math.sin(k_cm * (x_cm - dx_cm) - omega * t);
                 const px = cmToPx(x_cm);
                 const py = centerY - cmToPx(y_cm);
@@ -1132,17 +1822,16 @@
             
             if (!isDashed) {
                 ctx.fillStyle = '#ef4444'; 
-                const totalParticles = Math.floor(numWaves * 12); 
+                const totalParticles = 40; 
                 for (let i = 0; i <= totalParticles; i++) {
-                    const x_cm = i * (W_cm / totalParticles);
+                    const x_cm = i * (visibleWidth_cm / totalParticles);
                     const y_cm = amp_cm * Math.sin(k_cm * x_cm - omega * t);
                     const px = cmToPx(x_cm);
                     const py = centerY - cmToPx(y_cm);
                     
-                    // Selected particle highlight halo
-                    if (selectedParticles.has(i) && !isPlaying && showVectors) {
+                    if (selectedParticles.has(i) && !isPlaying) {
                         ctx.beginPath();
-                        ctx.arc(px, py, 9, 0, 2*Math.PI);
+                        ctx.arc(px, py, 10, 0, 2*Math.PI);
                         ctx.strokeStyle = '#facc15'; 
                         ctx.lineWidth = 2.5;
                         ctx.stroke();
@@ -1151,53 +1840,42 @@
                     ctx.shadowBlur = 8;
                     ctx.shadowColor = '#ef4444';
                     ctx.beginPath();
-                    ctx.arc(px, py, 4.5, 0, 2*Math.PI);
+                    ctx.arc(px, py, 4, 0, 2 * Math.PI);
                     ctx.fill();
-                    ctx.shadowBlur = 0;
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
-                    ctx.lineWidth = 1;
-                    ctx.moveTo(px, centerY);
-                    ctx.lineTo(px, py);
-                    ctx.stroke();
                 }
+                ctx.shadowBlur = 0;
             }
         }
 
-        function drawVerticalArrow(context, fromx, fromy, tox, toy) {
-            const headlen = 7; 
-            const angle = Math.atan2(toy - fromy, tox - fromx);
-            context.beginPath();
-            context.moveTo(fromx, fromy);
-            context.lineTo(tox, toy);
-            context.stroke();
-            
-            context.beginPath();
-            context.moveTo(tox, toy);
-            context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
-            context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-            context.closePath();
-            context.fill();
+        function drawVerticalArrow(ctx, fromX, fromY, toX, toY) {
+            const headlen = 8;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
         }
 
-        function drawVectors() {
-            if (selectedParticles.size === 0) return;
+        function drawMotionVectors() {
+            if (isPlaying || !showVectors || selectedParticles.size === 0) return;
 
-            const W = canvas.width;
             const centerY = canvas.height / 2;
             const k_cm = 2 * Math.PI / lambda_cm;
             const omega = 2 * Math.PI * freq_hz;
-            const totalParticles = Math.floor(numWaves * 12); 
+            const totalParticles = 40;
 
-            ctx.font = 'bold 11px "Courier New", Courier, monospace';
+            ctx.font = 'bold 9.5px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            selectedParticles.forEach(i => {
-                if (i > totalParticles) return;
-
-                const x_cm = i * (W_cm / totalParticles);
+            selectedParticles.forEach((i) => {
+                const x_cm = i * (visibleWidth_cm / totalParticles);
                 const y_cm_blue = amp_cm * Math.sin(k_cm * x_cm - omega * time);
                 const y_cm_green = amp_cm * Math.sin(k_cm * (x_cm - shiftX_cm) - omega * time);
                 
@@ -1245,8 +1923,6 @@
             });
         }
 
-        // ================== SHIFT VISUALIZATIONS ==================
-
         function drawCrestArrows() {
             const W = canvas.width;
             const centerY = canvas.height / 2;
@@ -1261,10 +1937,9 @@
             for (let n = -10; n <= 10; n++) {
                 const x_crest_cm = (Math.PI / 2 + omega * time + 2 * n * Math.PI) / k_cm;
                 
-                if (x_crest_cm > -lambda_cm && x_crest_cm < W_cm + lambda_cm) {
+                if (x_crest_cm > -lambda_cm && x_crest_cm < visibleWidth_cm + lambda_cm) {
                     const startX_px = cmToPx(x_crest_cm);
                     const startY_px = centerY - cmToPx(amp_cm);
-                    
                     const endX_px = cmToPx(x_crest_cm + shiftX_cm);
                     const endY_px = startY_px; 
                     
@@ -1292,106 +1967,246 @@
             ctx.restore();
         }
 
-        function drawShiftHUD() {
+        function drawWaveShiftIndicator() {
+            if (isPlaying || shiftX_cm === 0 || currentMode !== 'transverse') return;
+
             const W = canvas.width;
-            const px = W / 2;
-            const py = 42; 
-            
-            const isRight = shiftX_cm > 0;
-            const absShift = Math.abs(shiftX_cm);
-            const distText = absShift.toFixed(0) + " cm";
-            
+            const H = canvas.height;
+            const centerY = H / 2;
+            const k_cm = 2 * Math.PI / lambda_cm;
+            const omega = 2 * Math.PI * freq_hz;
+
+            let closestCrestX_cm = null;
+            let minDiff = Infinity;
+            const mid_cm = visibleWidth_cm / 2;
+
+            for (let n = -10; n <= 10; n++) {
+                const x_crest_cm = (Math.PI / 2 + omega * time + 2 * n * Math.PI) / k_cm;
+                if (x_crest_cm >= 5 && x_crest_cm <= visibleWidth_cm - 5) {
+                    const diff = Math.abs(x_crest_cm - mid_cm);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestCrestX_cm = x_crest_cm;
+                    }
+                }
+            }
+
+            let startX_px, endX_px, y_px;
+            if (closestCrestX_cm !== null) {
+                startX_px = cmToPx(closestCrestX_cm);
+                endX_px = cmToPx(closestCrestX_cm + shiftX_cm);
+                y_px = centerY - cmToPx(amp_cm) - 28; 
+            } else {
+                startX_px = cmToPx(mid_cm);
+                endX_px = cmToPx(mid_cm + shiftX_cm);
+                y_px = 35;
+            }
+
+            const arrowColor = '#34d399';
+            const headlen = 10;
+            const angle = shiftX_cm > 0 ? 0 : Math.PI;
+
             ctx.save();
-            
-            // 1. Background Pill
-            ctx.fillStyle = 'rgba(2, 6, 23, 0.88)';
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.6)';
-            ctx.lineWidth = 1;
-            const pillW = 190;
-            const pillH = 72;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(52, 211, 153, 0.8)';
+            ctx.strokeStyle = arrowColor;
+            ctx.fillStyle = arrowColor;
+            ctx.lineWidth = 3.5;
+
             ctx.beginPath();
-            ctx.roundRect(px - pillW/2, py - 18, pillW, pillH, 8);
+            ctx.moveTo(startX_px, y_px);
+            ctx.lineTo(endX_px, y_px);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endX_px, y_px);
+            ctx.lineTo(endX_px - headlen * Math.cos(angle - Math.PI / 5), y_px - headlen * Math.sin(angle - Math.PI / 5));
+            ctx.lineTo(endX_px - headlen * Math.cos(angle + Math.PI / 5), y_px - headlen * Math.sin(angle + Math.PI / 5));
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(startX_px, y_px, 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            const dirText = shiftX_cm > 0 ? '▶ 向右傳遞 (RIGHT)' : '◀ 向左傳遞 (LEFT)';
+            const distText = `移動距離: ${Math.abs(shiftX_cm).toFixed(0)} cm`;
+            const badgeText = `${dirText} | ${distText}`;
+
+            ctx.font = 'bold 12px "Segoe UI", sans-serif';
+            const textW = ctx.measureText(badgeText).width;
+            const midX = (startX_px + endX_px) / 2;
+            const badgeY = y_px > 45 ? y_px - 14 : y_px + 22;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.roundRect(midX - textW / 2 - 8, badgeY - 11, textW + 16, 22, 4);
             ctx.fill();
             ctx.stroke();
 
-            // 2. Big Arrow
-            const arrowW = 80;
-            const startX = isRight ? px - arrowW/2 : px + arrowW/2;
-            const endX = isRight ? px + arrowW/2 : px - arrowW/2;
-            
-            ctx.strokeStyle = '#34d399';
-            ctx.lineWidth = 4.5;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#10b981';
-            
-            const headlen = 13; 
-            const angle = Math.atan2(0, endX - startX);
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, py + 18);
-            ctx.lineTo(endX, py + 18);
-            ctx.stroke();
-            
-            ctx.setLineDash([]);
-            ctx.fillStyle = ctx.strokeStyle;
-            ctx.beginPath();
-            ctx.moveTo(endX, py + 18);
-            ctx.lineTo(endX - headlen * Math.cos(angle - Math.PI / 6), py + 18 - headlen * Math.sin(angle - Math.PI / 6));
-            ctx.lineTo(endX - headlen * Math.cos(angle + Math.PI / 6), py + 18 - headlen * Math.sin(angle + Math.PI / 6));
-            ctx.closePath();
-            ctx.fill();
-            
-            // 3. Texts
-            ctx.shadowBlur = 0;
-            ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
-            ctx.fillStyle = '#a7f3d0';
+            ctx.fillStyle = '#ffffff';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`平移方向：向${isRight ? '右' : '左'}`, px, py - 3);
-            
-            ctx.font = 'bold 18px "Courier New", Courier, monospace';
-            ctx.fillStyle = '#34d399';
-            ctx.fillText(distText, px, py + 36);
-            
+            ctx.fillText(badgeText, midX, badgeY);
+
             ctx.restore();
         }
 
-        // =============================================================
+        // Longitudinal Wave Rendering
+        function drawLongitudinalScene() {
+            const W = canvas.width;
+            const H = canvas.height;
+            const k_cm = 2 * Math.PI / lambda_cm;
+            const omega = 2 * Math.PI * freq_hz;
+
+            const zone1H = H * 0.46;
+            const zone1CenterY = zone1H * 0.52;
+            const zone2H = H * 0.46;
+            const zone2CenterY = H - zone2H * 0.5;
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(0, H * 0.48);
+            ctx.lineTo(W, H * 0.48);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = 'bold 11px "Segoe UI", sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.textAlign = 'left';
+            ctx.fillText('【實體縱波】質點左右疏密排布 (疏密推進速度 = 波速 v)', 12, 18);
+
+            ctx.fillStyle = '#a855f7';
+            ctx.fillText('【教材位移圖】橫波化表示 (波峰=向右最大位移，波谷=向左最大位移)', 12, H * 0.52);
+
+            const numSlices = 70;
+            const particleRows = 7;
+            const rowSpacing = (zone1H * 0.55) / (particleRows - 1);
+            const startRowY = zone1CenterY - (zone1H * 0.55) / 2;
+
+            for (let j = 0; j <= numSlices; j++) {
+                const x0_cm = j * (visibleWidth_cm / numSlices);
+                const maxDispAllowed = (visibleWidth_cm / numSlices) * 0.85;
+                const dispScale = Math.min(1.0, maxDispAllowed / amp_cm);
+                const xi_cm = (amp_cm * dispScale) * Math.sin(k_cm * x0_cm - omega * time);
+                const actual_x_cm = x0_cm + xi_cm;
+                const px = cmToPx(actual_x_cm);
+
+                const dxi_dx = (amp_cm * dispScale) * k_cm * Math.cos(k_cm * x0_cm - omega * time);
+                const densityRatio = 1 - dxi_dx;
+
+                let sliceColor;
+                if (densityRatio >= 1.0) {
+                    const tCol = Math.min(1.0, (densityRatio - 1.0) / 0.8);
+                    sliceColor = `rgba(251, 191, 36, ${0.4 + tCol * 0.6})`;
+                } else {
+                    const tCol = Math.min(1.0, (1.0 - densityRatio) / 0.8);
+                    sliceColor = `rgba(56, 189, 248, ${0.4 + tCol * 0.5})`;
+                }
+
+                ctx.beginPath();
+                ctx.strokeStyle = sliceColor;
+                ctx.lineWidth = densityRatio > 1.1 ? 2.5 : 1.2;
+                ctx.moveTo(px, startRowY);
+                ctx.lineTo(px, startRowY + (particleRows - 1) * rowSpacing);
+                ctx.stroke();
+
+                ctx.fillStyle = sliceColor;
+                for (let r = 0; r < particleRows; r++) {
+                    const py = startRowY + r * rowSpacing;
+                    ctx.beginPath();
+                    ctx.arc(px, py, densityRatio > 1.1 ? 2.5 : 1.8, 0, 2*Math.PI);
+                    ctx.fill();
+                }
+
+                // Center red probe particle
+                if (j === Math.floor(numSlices * 0.5)) {
+                    const probeY = zone1CenterY;
+                    ctx.beginPath();
+                    ctx.arc(px, probeY, 5.5, 0, 2*Math.PI);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ef4444';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    const eqPx = cmToPx(x0_cm);
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+                    ctx.setLineDash([2, 2]);
+                    ctx.moveTo(eqPx, probeY - 12);
+                    ctx.lineTo(eqPx, probeY + 12);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+
+            // Mark 密部 & 疏部
+            ctx.font = 'bold 10px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            for (let n = -8; n <= 8; n++) {
+                const x_comp_cm = (Math.PI + omega * time + 2 * n * Math.PI) / k_cm;
+                if (x_comp_cm >= 0 && x_comp_cm <= visibleWidth_cm) {
+                    const px = cmToPx(x_comp_cm);
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.fillText('▼ 密部中心', px, startRowY - 6);
+                }
+                const x_rare_cm = (omega * time + 2 * n * Math.PI) / k_cm;
+                if (x_rare_cm >= 0 && x_rare_cm <= visibleWidth_cm) {
+                    const px = cmToPx(x_rare_cm);
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.fillText('▼ 疏部中心', px, startRowY - 6);
+                }
+            }
+
+            drawGraticule(zone2CenterY);
+            ctx.beginPath();
+            ctx.strokeStyle = '#c084fc';
+            ctx.lineWidth = 2.5;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#a855f7';
+
+            for (let x_cm = 0; x_cm <= visibleWidth_cm; x_cm += 0.2) {
+                const disp_cm = amp_cm * Math.sin(k_cm * x_cm - omega * time);
+                const px = cmToPx(x_cm);
+                const py = zone2CenterY - cmToPx(disp_cm);
+                if (x_cm === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
 
         function drawScene() {
-            drawGraticule();
-            
-            if (!isPlaying && shiftX_cm !== 0) {
-                drawWave(time, shiftX_cm, true, '#10b981', true); 
-                drawCrestArrows();
-            }
-            
-            drawWave(time, 0, false, '#60a5fa', true);
-
-            if (!isPlaying && shiftX_cm !== 0 && showVectors) {
-                drawVectors();
-            }
-
-            if (!isPlaying && shiftX_cm !== 0) {
-                drawShiftHUD();
+            if (currentMode === 'transverse') {
+                drawGraticule();
+                if (!isPlaying && shiftX_cm !== 0) {
+                    drawTransverseWave(time, shiftX_cm, true, '#34d399', false);
+                    drawCrestArrows();
+                    drawWaveShiftIndicator();
+                }
+                drawTransverseWave(time, 0, false, '#38bdf8', true);
+                drawMotionVectors();
+            } else {
+                drawLongitudinalScene();
             }
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             drawScene();
 
-            // Lens rendering
             if (lensActive) {
                 ctx.save();
                 const halfSize = lensSize / 2;
-
                 ctx.beginPath();
                 ctx.rect(lensX - halfSize, lensY - halfSize, lensSize, lensSize);
                 ctx.fillStyle = '#020617'; 
                 ctx.fill();
-
                 ctx.clip(); 
 
                 ctx.translate(lensX, lensY);
@@ -1399,7 +2214,6 @@
                 ctx.translate(-lensX, -lensY);
 
                 drawScene();
-
                 ctx.restore();
 
                 ctx.beginPath();
@@ -1409,41 +2223,876 @@
                 ctx.stroke();
 
                 ctx.beginPath();
-                ctx.rect(lensX - halfSize - 1.5, lensY - halfSize - 1.5, lensSize + 3, lensSize + 3);
-                ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-
-                ctx.beginPath();
                 ctx.moveTo(lensX - 8, lensY); ctx.lineTo(lensX + 8, lensY);
-                ctx.moveTo(lensX, lensY - 8); ctx.lineTo(lensX, lensY + 8);
+                ctx.moveTo(lensX, lensY - 8); ctx.lineTo(lensX + 8, lensY);
                 ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
             }
         }
 
-        function animate(now) {
-            if (isPlaying) {
-                const dt = (now - lastFrameTime) / 1000;
-                time += dt;
-                lastFrameTime = now;
-                draw();
+        // ========================================================
+        // MODULE 2: BEAD STRING WAVE GENERATOR (質點繩波產生器)
+        // ========================================================
+        const beadCanvas = document.getElementById('beadCanvas');
+        const bCtx = beadCanvas.getContext('2d');
+        const beadCanvasContainer = document.getElementById('beadCanvasContainer');
+
+        let beadMode = 1; // 1: 4-stage demo, 2: manual arrow-key
+        let handSide = 'left'; // 'left' or 'right'
+        let beadThemeDark = false;
+
+        // Bead string physics parameters
+        const NUM_BEADS = 80;
+        let beadAmp = 75;        // px (振幅)
+        let beadWaveSpeed = 140; // px/s (波速)
+        let shakeSpeedScale = 1.0;
+
+        // Wave propagation history: store { t, y }
+        let beadSimTime = 0;
+        let beadHandHistory = [];
+        let beadIsPaused = false;
+
+        // Current hand physical displacement (-beadAmp <= handY <= beadAmp)
+        let currentHandY = 0;
+        let targetHandY = 0;
+        let handTransitionStart = 0;
+        let handTransitionDuration = 0.35;
+        let handFromY = 0;
+        let isHandTransitioning = false;
+
+        // Mode 1 state machine
+        let mode1Running = false;
+        let mode1Stage = 0; // 0: ready, 1: 0->+A, 2: +A->0, 3: 0->-A, 4: -A->0, 5: propagating
+        let mode1StageTime = 0;
+        let mode1StageDuration = 0.45; // sec per quarter wave
+        let isSingleStepping = false;   // True when stepping one stage at a time
+        let stageWaitingNextStep = false; // True when paused at end of stage, waiting for next step click
+
+        // Mode 2 state machine
+        let targetShakeCount = 4; // number of amplitudes
+        let currentShakeCount = 0;
+        let mode2AutoShaking = false;
+        let mode2Sequence = []; // array of target Y offsets
+
+        // DOM elements for bead wave
+        const btnBeadMode1 = document.getElementById('btnBeadMode1');
+        const btnBeadMode2 = document.getElementById('btnBeadMode2');
+        const btnHandLeft = document.getElementById('btnHandLeft');
+        const btnHandRight = document.getElementById('btnHandRight');
+        const btnToggleBeadTheme = document.getElementById('btnToggleBeadTheme');
+        const btnResetBeads = document.getElementById('btnResetBeads');
+
+        const beadMode1Panel = document.getElementById('beadMode1Panel');
+        const beadMode2Panel = document.getElementById('beadMode2Panel');
+        const btnStartFourStages = document.getElementById('btnStartFourStages');
+        const btnPauseBead = document.getElementById('btnPauseBead');
+        const btnStepBead = document.getElementById('btnStepBead');
+
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
+        const stepPropagate = document.getElementById('stepPropagate');
+
+        const btnKeyUp = document.getElementById('btnKeyUp');
+        const btnKeyDown = document.getElementById('btnKeyDown');
+        const btnMinusShakes = document.getElementById('btnMinusShakes');
+        const btnPlusShakes = document.getElementById('btnPlusShakes');
+        const counterShakeDisplay = document.getElementById('counterShakeDisplay');
+        const valTargetShakes = document.getElementById('valTargetShakes');
+        const btnConfirmShakeCount = document.getElementById('btnConfirmShakeCount');
+
+        const inputBeadAmp = document.getElementById('inputBeadAmp');
+        const valBeadAmp = document.getElementById('valBeadAmp');
+        const inputBeadSpeed = document.getElementById('inputBeadSpeed');
+        const valBeadSpeed = document.getElementById('valBeadSpeed');
+        const inputShakeSpeed = document.getElementById('inputShakeSpeed');
+        const valShakeSpeed = document.getElementById('valShakeSpeed');
+
+        const beadHudTitle = document.getElementById('beadHudTitle');
+        const beadHudStage = document.getElementById('beadHudStage');
+        const beadHudDesc = document.getElementById('beadHudDesc');
+        const hudDirText = document.getElementById('hudDirText');
+        const hudDispText = document.getElementById('hudDispText');
+        const hudSpeedText = document.getElementById('hudSpeedText');
+
+        // Mode 1 vs Mode 2 switchers
+        btnBeadMode1.addEventListener('click', () => {
+            beadMode = 1;
+            btnBeadMode1.classList.add('active');
+            btnBeadMode2.classList.remove('active');
+            beadMode1Panel.style.display = 'flex';
+            beadMode2Panel.style.display = 'none';
+            beadHudTitle.textContent = '模式一：四段甩動生成 1 個全波';
+            resetBeadSimulation();
+        });
+
+        btnBeadMode2.addEventListener('click', () => {
+            beadMode = 2;
+            btnBeadMode2.classList.add('active');
+            btnBeadMode1.classList.remove('active');
+            beadMode1Panel.style.display = 'none';
+            beadMode2Panel.style.display = 'flex';
+            beadHudTitle.textContent = '模式二：自選手動甩動次數 (上下鍵控制)';
+            beadHudStage.textContent = '就緒：請按 ↑ / ↓ 鍵或設定次數後按確定';
+            beadHudDesc.textContent = '每次按上下鍵，手會移動 1 個振幅距離並帶動波動往前傳！';
+            resetBeadSimulation();
+        });
+
+        btnHandLeft.addEventListener('click', () => {
+            handSide = 'left';
+            btnHandLeft.classList.add('active');
+            btnHandRight.classList.remove('active');
+            hudDirText.textContent = '➡️ 向右傳播';
+            resetBeadSimulation();
+        });
+
+        btnHandRight.addEventListener('click', () => {
+            handSide = 'right';
+            btnHandRight.classList.add('active');
+            btnHandLeft.classList.remove('active');
+            hudDirText.textContent = '⬅️ 向左傳播';
+            resetBeadSimulation();
+        });
+
+        btnToggleBeadTheme.addEventListener('click', () => {
+            beadThemeDark = !beadThemeDark;
+            if (beadThemeDark) {
+                beadCanvasContainer.classList.add('dark-theme');
+                btnToggleBeadTheme.textContent = '🌙 暗色示波風';
+            } else {
+                beadCanvasContainer.classList.remove('dark-theme');
+                btnToggleBeadTheme.textContent = '📜 典雅教材風';
             }
+            drawBeadScene();
+        });
+
+        btnResetBeads.addEventListener('click', () => {
+            resetBeadSimulation();
+        });
+
+        // Parameters inputs
+        inputBeadAmp.addEventListener('input', (e) => {
+            beadAmp = parseFloat(e.target.value);
+            valBeadAmp.textContent = beadAmp + ' px';
+        });
+
+        inputBeadSpeed.addEventListener('input', (e) => {
+            beadWaveSpeed = parseFloat(e.target.value);
+            valBeadSpeed.textContent = beadWaveSpeed + ' px/s';
+            hudSpeedText.textContent = `v = ${beadWaveSpeed} px/s`;
+        });
+
+        inputShakeSpeed.addEventListener('input', (e) => {
+            shakeSpeedScale = parseFloat(e.target.value);
+            valShakeSpeed.textContent = shakeSpeedScale.toFixed(2) + 'x';
+            mode1StageDuration = 0.45 / shakeSpeedScale;
+        });
+
+        function resizeBeadCanvas() {
+            if (!beadCanvasContainer) return;
+            const rect = beadCanvasContainer.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            beadCanvas.width = rect.width;
+            beadCanvas.height = rect.height;
+            drawBeadScene();
+        }
+
+        function resetBeadSimulation() {
+            beadSimTime = 0;
+            beadHandHistory = [];
+            currentHandY = 0;
+            targetHandY = 0;
+            isHandTransitioning = false;
+            mode1Running = false;
+            mode1Stage = 0;
+            mode1StageTime = 0;
+            isSingleStepping = false;
+            stageWaitingNextStep = false;
+            mode2AutoShaking = false;
+            mode2Sequence = [];
+            beadIsPaused = false;
+            btnPauseBead.textContent = '⏸ 暫停';
+
+            // Reset steppers
+            [step1, step2, step3, step4, stepPropagate].forEach(el => {
+                el.className = 'stage-step';
+            });
+
+            if (beadMode === 1) {
+                beadHudStage.textContent = '準備就緒：請按下「開始示範」或「單步執行」';
+                beadHudDesc.textContent = '質點排成水平直線，一隻手抓著端點質點。';
+            } else {
+                beadHudStage.textContent = '就緒：請按 ↑ / ↓ 鍵或設定次數後按確定';
+                beadHudDesc.textContent = '每次按上下鍵，手會移動 1 個振幅距離並帶動波動往前傳！';
+            }
+            hudDispText.textContent = '0.0 A';
+            drawBeadScene();
+        }
+
+        // ==========================================
+        // Mode 1: Four-stage Shake Controller
+        // ==========================================
+        // Continuous auto-play button
+        btnStartFourStages.addEventListener('click', () => {
+            resetBeadSimulation();
+            mode1Running = true;
+            mode1Stage = 1;
+            mode1StageTime = 0;
+            isSingleStepping = false;
+            stageWaitingNextStep = false;
+            beadIsPaused = false;
+            btnPauseBead.textContent = '⏸ 暫停';
+            updateMode1Stepper();
+        });
+
+        btnPauseBead.addEventListener('click', () => {
+            beadIsPaused = !beadIsPaused;
+            btnPauseBead.textContent = beadIsPaused ? '▶ 繼續' : '⏸ 暫停';
+            if (!beadIsPaused && stageWaitingNextStep) {
+                // If resuming from step pause, continue in continuous mode
+                isSingleStepping = false;
+                stageWaitingNextStep = false;
+                if (mode1Stage < 4) {
+                    mode1Stage++;
+                    mode1StageTime = 0;
+                    updateMode1Stepper();
+                } else {
+                    mode1Stage = 5;
+                    mode1StageTime = 0;
+                    updateMode1Stepper();
+                }
+            }
+        });
+
+        // STEP EXECUTION: Hand moves smoothly during the stage, then auto-pauses the screen!
+        btnStepBead.addEventListener('click', () => {
+            if (!mode1Running || mode1Stage === 0) {
+                // Start Stage 1 in step mode
+                resetBeadSimulation();
+                mode1Running = true;
+                mode1Stage = 1;
+                mode1StageTime = 0;
+                isSingleStepping = true;
+                stageWaitingNextStep = false;
+                beadIsPaused = false;
+                btnPauseBead.textContent = '⏸ 暫停';
+                updateMode1Stepper();
+                beadHudStage.textContent = '【單步進行中】第 1 段：手向上甩 (0 → +A)';
+                beadHudDesc.textContent = '手正在向上甩動，到達最高點後畫面將自動定格暫停！';
+            } else if (stageWaitingNextStep) {
+                // Already at pause boundary, advance to next stage!
+                if (mode1Stage < 4) {
+                    mode1Stage++;
+                    mode1StageTime = 0;
+                    isSingleStepping = true;
+                    stageWaitingNextStep = false;
+                    beadIsPaused = false;
+                    btnPauseBead.textContent = '⏸ 暫停';
+                    updateMode1Stepper();
+                    if (mode1Stage === 2) {
+                        beadHudStage.textContent = '【單步進行中】第 2 段：手向下甩 (+A → 0)';
+                        beadHudDesc.textContent = '手正在甩回平衡點，到達後畫面將自動定格暫停！';
+                    } else if (mode1Stage === 3) {
+                        beadHudStage.textContent = '【單步進行中】第 3 段：手向下甩 (0 → -A)';
+                        beadHudDesc.textContent = '手正在甩至最低點，到達後畫面將自動定格暫停！';
+                    } else if (mode1Stage === 4) {
+                        beadHudStage.textContent = '【單步進行中】第 4 段：手向上甩 (-A → 0)';
+                        beadHudDesc.textContent = '手正在甩回平衡點，全波完成後畫面將自動定格暫停！';
+                    }
+                } else if (mode1Stage === 4) {
+                    mode1Stage = 5;
+                    mode1StageTime = 0;
+                    isSingleStepping = true;
+                    stageWaitingNextStep = false;
+                    beadIsPaused = false;
+                    btnPauseBead.textContent = '⏸ 暫停';
+                    updateMode1Stepper();
+                    beadHudStage.textContent = '【單步進行中】波形向前傳播';
+                    beadHudDesc.textContent = '波形正在沿著質點串推進，前進一段後將自動定格暫停！';
+                } else {
+                    // Stage 5 step advance
+                    mode1StageTime = 0;
+                    isSingleStepping = true;
+                    stageWaitingNextStep = false;
+                    beadIsPaused = false;
+                    btnPauseBead.textContent = '⏸ 暫停';
+                    beadHudStage.textContent = '【單步進行中】波形向前推進';
+                    beadHudDesc.textContent = '波形持續向前推進，前進一段後將自動定格暫停！';
+                }
+            } else if (beadIsPaused) {
+                // Was manually paused during a stage, resume step execution
+                isSingleStepping = true;
+                beadIsPaused = false;
+                btnPauseBead.textContent = '⏸ 暫停';
+            }
+        });
+
+        function updateMode1Stepper() {
+            [step1, step2, step3, step4, stepPropagate].forEach(el => el.className = 'stage-step');
+            if (mode1Stage === 1) {
+                step1.className = 'stage-step active';
+                if (!stageWaitingNextStep) {
+                    beadHudStage.textContent = '第 1 段：手向上甩 (0 → +A)';
+                    beadHudDesc.textContent = '質點由平衡位置移至最高點，位移 1A，產生 1/4 個正波！';
+                }
+            } else if (mode1Stage === 2) {
+                step1.className = 'stage-step done';
+                step2.className = 'stage-step active';
+                if (!stageWaitingNextStep) {
+                    beadHudStage.textContent = '第 2 段：手向下甩 (+A → 0)';
+                    beadHudDesc.textContent = '質點由最高點回到平衡點，位移 1A (累計 2A)，波峰完整形成！';
+                }
+            } else if (mode1Stage === 3) {
+                step1.className = 'stage-step done';
+                step2.className = 'stage-step done';
+                step3.className = 'stage-step active';
+                if (!stageWaitingNextStep) {
+                    beadHudStage.textContent = '第 3 段：手向下甩 (0 → -A)';
+                    beadHudDesc.textContent = '質點由平衡點移至最低點，位移 1A (累計 3A)，產生 3/4 個波！';
+                }
+            } else if (mode1Stage === 4) {
+                step1.className = 'stage-step done';
+                step2.className = 'stage-step done';
+                step3.className = 'stage-step done';
+                step4.className = 'stage-step active';
+                if (!stageWaitingNextStep) {
+                    beadHudStage.textContent = '第 4 段：手向上甩 (-A → 0)';
+                    beadHudDesc.textContent = '質點回到平衡點，位移 1A (累計 4A)，1 個完整全波誕生！';
+                }
+            } else if (mode1Stage === 5) {
+                step1.className = 'stage-step done';
+                step2.className = 'stage-step done';
+                step3.className = 'stage-step done';
+                step4.className = 'stage-step done';
+                stepPropagate.className = 'stage-step active';
+                if (!stageWaitingNextStep) {
+                    beadHudStage.textContent = '波形持續向前傳遞中...';
+                    beadHudDesc.textContent = '手停在平衡點，波形沿質點串向前推進，將穿出邊界消失！';
+                }
+            }
+        }
+
+        // ==========================================
+        // Mode 2: Arrow Key Controls
+        // ==========================================
+        function triggerManualHandShift(direction) {
+            if (beadMode !== 2) return;
+            const tolerance = beadAmp * 0.2;
+            let currentLevel = 0;
+            if (currentHandY > tolerance) currentLevel = 1;
+            else if (currentHandY < -tolerance) currentLevel = -1;
+
+            let nextLevel = currentLevel + direction;
+            if (nextLevel > 1) nextLevel = 1;
+            if (nextLevel < -1) nextLevel = -1;
+
+            handFromY = currentHandY;
+            targetHandY = nextLevel * beadAmp;
+            handTransitionStart = beadSimTime;
+            handTransitionDuration = 0.3 / shakeSpeedScale;
+            isHandTransitioning = true;
+
+            const dispFrac = (targetHandY / beadAmp).toFixed(1);
+            beadHudStage.textContent = direction > 0 ? '▲ 手向上甩動 (+1A)' : '▼ 手向下甩動 (-1A)';
+            beadHudDesc.textContent = `端點移動至 ${dispFrac} A，帶動後續質點依序向前傳遞！`;
+        }
+
+        btnKeyUp.addEventListener('click', () => triggerManualHandShift(1));
+        btnKeyDown.addEventListener('click', () => triggerManualHandShift(-1));
+
+        window.addEventListener('keydown', (e) => {
+            if (currentTab !== 'beadwave') return;
+            if (beadMode === 2) {
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    triggerManualHandShift(1);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    triggerManualHandShift(-1);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    executeShakeCount();
+                }
+            }
+        });
+
+        // Count setting
+        btnMinusShakes.addEventListener('click', () => {
+            if (targetShakeCount > 1) {
+                targetShakeCount--;
+                updateShakeCounterUI();
+            }
+        });
+
+        btnPlusShakes.addEventListener('click', () => {
+            if (targetShakeCount < 16) {
+                targetShakeCount++;
+                updateShakeCounterUI();
+            }
+        });
+
+        function updateShakeCounterUI() {
+            const waves = (targetShakeCount / 4).toFixed(2);
+            counterShakeDisplay.textContent = `${targetShakeCount} 次振幅 (${waves}波)`;
+            valTargetShakes.textContent = `${targetShakeCount} 次 (${waves}全波)`;
+        }
+
+        btnConfirmShakeCount.addEventListener('click', () => {
+            executeShakeCount();
+        });
+
+        function executeShakeCount() {
+            if (beadMode !== 2) return;
+            resetBeadSimulation();
+            mode2AutoShaking = true;
+            mode2Sequence = [];
             
+            // Build sequence: 0 -> +A -> 0 -> -A -> 0 -> +A -> ...
+            let level = 0;
+            let dir = 1;
+            for (let i = 0; i < targetShakeCount; i++) {
+                if (level === 0) {
+                    level = dir;
+                } else if (level === 1) {
+                    level = 0;
+                    dir = -1;
+                } else if (level === -1) {
+                    level = 0;
+                    dir = 1;
+                }
+                mode2Sequence.push(level * beadAmp);
+            }
+            if (level !== 0) {
+                mode2Sequence.push(0);
+            }
+
+            beadHudStage.textContent = `自動執行：甩動 ${targetShakeCount} 次振幅`;
+            beadHudDesc.textContent = '手部依照設定節奏依序甩動，波包將形成並向前推進！';
+        }
+
+        // ==========================================
+        // Bead Physics Simulation Engine
+        // ==========================================
+        function updateBeadPhysics(dt) {
+            if (beadIsPaused) return;
+
+            beadSimTime += dt;
+
+            // Handle Mode 1: 4-Stage State Machine with Single-Step Pause Feature
+            if (mode1Running) {
+                mode1StageTime += dt;
+                const T = mode1StageDuration;
+
+                if (mode1Stage === 1) {
+                    // 0 -> +A: y = A * sin(pi/2 * t/T)
+                    const progress = Math.min(1.0, mode1StageTime / T);
+                    currentHandY = beadAmp * Math.sin((Math.PI / 2) * progress);
+                    if (progress >= 1.0) {
+                        currentHandY = beadAmp;
+                        if (isSingleStepping) {
+                            // Hand finished Stage 1! Freeze screen for teacher explanation
+                            beadIsPaused = true;
+                            stageWaitingNextStep = true;
+                            btnPauseBead.textContent = '▶ 繼續';
+                            updateMode1Stepper();
+                            beadHudStage.textContent = '⏸ 第 1 段完成 (手停在最高點 +A)';
+                            beadHudDesc.textContent = '手已甩至最高點 (+1A)，位移 1A，形成 1/4 個波！畫面已定格暫停，請點「單步執行」繼續下一段。';
+                        } else {
+                            mode1Stage = 2;
+                            mode1StageTime = 0;
+                            updateMode1Stepper();
+                        }
+                    }
+                } else if (mode1Stage === 2) {
+                    // +A -> 0: y = A * cos(pi/2 * t/T)
+                    const progress = Math.min(1.0, mode1StageTime / T);
+                    currentHandY = beadAmp * Math.cos((Math.PI / 2) * progress);
+                    if (progress >= 1.0) {
+                        currentHandY = 0;
+                        if (isSingleStepping) {
+                            // Hand finished Stage 2! Freeze screen
+                            beadIsPaused = true;
+                            stageWaitingNextStep = true;
+                            btnPauseBead.textContent = '▶ 繼續';
+                            updateMode1Stepper();
+                            beadHudStage.textContent = '⏸ 第 2 段完成 (手回到平衡位置 0)';
+                            beadHudDesc.textContent = '手回到平衡位置，位移 1A (累計 2A)，波峰完整成形！畫面已定格暫停，請點「單步執行」繼續下一段。';
+                        } else {
+                            mode1Stage = 3;
+                            mode1StageTime = 0;
+                            updateMode1Stepper();
+                        }
+                    }
+                } else if (mode1Stage === 3) {
+                    // 0 -> -A: y = -A * sin(pi/2 * t/T)
+                    const progress = Math.min(1.0, mode1StageTime / T);
+                    currentHandY = -beadAmp * Math.sin((Math.PI / 2) * progress);
+                    if (progress >= 1.0) {
+                        currentHandY = -beadAmp;
+                        if (isSingleStepping) {
+                            // Hand finished Stage 3! Freeze screen
+                            beadIsPaused = true;
+                            stageWaitingNextStep = true;
+                            btnPauseBead.textContent = '▶ 繼續';
+                            updateMode1Stepper();
+                            beadHudStage.textContent = '⏸ 第 3 段完成 (手停在最低點 -A)';
+                            beadHudDesc.textContent = '手甩至最低點 (-1A)，位移 1A (累計 3A)，產生 3/4 個波！畫面已定格暫停，請點「單步執行」繼續下一段。';
+                        } else {
+                            mode1Stage = 4;
+                            mode1StageTime = 0;
+                            updateMode1Stepper();
+                        }
+                    }
+                } else if (mode1Stage === 4) {
+                    // -A -> 0: y = -A * cos(pi/2 * t/T)
+                    const progress = Math.min(1.0, mode1StageTime / T);
+                    currentHandY = -beadAmp * Math.cos((Math.PI / 2) * progress);
+                    if (progress >= 1.0) {
+                        currentHandY = 0;
+                        if (isSingleStepping) {
+                            // Hand finished Stage 4! Freeze screen
+                            beadIsPaused = true;
+                            stageWaitingNextStep = true;
+                            btnPauseBead.textContent = '▶ 繼續';
+                            updateMode1Stepper();
+                            beadHudStage.textContent = '⏸ 第 4 段完成 (手回到平衡位置 0)';
+                            beadHudDesc.textContent = '手回到平衡位置，位移 1A (累計 4A)，1 個完整全波形成！畫面已定格暫停，請點「單步執行」觀察波向前傳播。';
+                        } else {
+                            mode1Stage = 5;
+                            mode1StageTime = 0;
+                            updateMode1Stepper();
+                        }
+                    }
+                } else if (mode1Stage === 5) {
+                    currentHandY = 0;
+                    if (isSingleStepping) {
+                        // Advance propagation by 0.6s then pause
+                        if (mode1StageTime >= 0.6 / shakeSpeedScale) {
+                            beadIsPaused = true;
+                            stageWaitingNextStep = true;
+                            btnPauseBead.textContent = '▶ 繼續';
+                            beadHudStage.textContent = '⏸ 波形前進傳播中 (畫面已暫停)';
+                            beadHudDesc.textContent = '手維持在平衡點靜止，波形沿質點串持續向前推進！可再次點擊「單步執行」或「繼續」。';
+                        }
+                    }
+                }
+            }
+
+            // Handle Mode 2 transitions
+            if (beadMode === 2) {
+                if (mode2AutoShaking) {
+                    if (mode2Sequence.length > 0) {
+                        if (!isHandTransitioning) {
+                            const nextTarget = mode2Sequence.shift();
+                            handFromY = currentHandY;
+                            targetHandY = nextTarget;
+                            handTransitionStart = beadSimTime;
+                            handTransitionDuration = 0.35 / shakeSpeedScale;
+                            isHandTransitioning = true;
+                        }
+                    } else if (!isHandTransitioning) {
+                        mode2AutoShaking = false;
+                        beadHudStage.textContent = '甩動完成！波形持續傳遞中';
+                        beadHudDesc.textContent = '波包穿出另一端邊界後將完全消失。';
+                    }
+                }
+
+                if (isHandTransitioning) {
+                    const elapsed = beadSimTime - handTransitionStart;
+                    const p = Math.min(1.0, elapsed / handTransitionDuration);
+                    const smoothP = 0.5 - 0.5 * Math.cos(Math.PI * p);
+                    currentHandY = handFromY + (targetHandY - handFromY) * smoothP;
+                    if (p >= 1.0) {
+                        currentHandY = targetHandY;
+                        isHandTransitioning = false;
+                    }
+                }
+            }
+
+            // Push current hand position into history
+            beadHandHistory.push({ t: beadSimTime, y: currentHandY });
+
+            // Prune history older than propagation across screen
+            const W = beadCanvas.width || 800;
+            const maxTravelTime = W / beadWaveSpeed + 3.0;
+            while (beadHandHistory.length > 0 && beadSimTime - beadHandHistory[0].t > maxTravelTime) {
+                beadHandHistory.shift();
+            }
+
+            hudDispText.textContent = `${(currentHandY / beadAmp).toFixed(2)} A`;
+        }
+
+        // Get hand position at past time tau via interpolation
+        function getHandYAtTime(targetTime) {
+            if (beadHandHistory.length === 0 || targetTime < 0) return 0;
+            if (targetTime >= beadSimTime) return currentHandY;
+
+            let low = 0, high = beadHandHistory.length - 1;
+            while (low <= high) {
+                let mid = (low + high) >> 1;
+                if (beadHandHistory[mid].t < targetTime) {
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            if (low === 0) return beadHandHistory[0].y;
+            if (low >= beadHandHistory.length) return beadHandHistory[beadHandHistory.length - 1].y;
+
+            const p0 = beadHandHistory[low - 1];
+            const p1 = beadHandHistory[low];
+            const frac = (targetTime - p0.t) / (p1.t - p0.t);
+            return p0.y + (p1.y - p0.y) * frac;
+        }
+
+        // ==========================================
+        // Bead String & Hand Drawing Functions
+        // ==========================================
+        function drawHand(ctx, x, y, isRightSide) {
+            ctx.save();
+            ctx.translate(x, y);
+            if (isRightSide) {
+                ctx.scale(-1, 1);
+            }
+
+            ctx.save();
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0,0,0,0.35)';
+
+            // 1. Arm & Wrist
+            ctx.fillStyle = '#f6ad55';
+            ctx.beginPath();
+            ctx.moveTo(-110, -16);
+            ctx.bezierCurveTo(-90, -22, -60, -26, -35, -24);
+            ctx.bezierCurveTo(-15, -22, -5, -28, 5, -20);
+            ctx.lineTo(8, -10);
+            ctx.bezierCurveTo(-2, -5, -15, 0, -20, 10);
+            ctx.bezierCurveTo(-45, 18, -75, 18, -110, 14);
+            ctx.closePath();
+            ctx.fill();
+
+            // 2. Palm main skin tone
+            const skinGrad = ctx.createLinearGradient(-100, -20, 10, 20);
+            skinGrad.addColorStop(0, '#fbd38d');
+            skinGrad.addColorStop(0.5, '#fed7aa');
+            skinGrad.addColorStop(1, '#f6ad55');
+            ctx.fillStyle = skinGrad;
+            ctx.beginPath();
+            ctx.moveTo(-105, -14);
+            ctx.bezierCurveTo(-85, -20, -55, -23, -30, -21);
+            ctx.bezierCurveTo(-10, -19, 0, -22, 6, -15);
+            ctx.lineTo(6, -8);
+            ctx.bezierCurveTo(-5, 0, -18, 5, -22, 12);
+            ctx.bezierCurveTo(-48, 16, -75, 15, -105, 12);
+            ctx.closePath();
+            ctx.fill();
+
+            // 3. Thumb pointing forward-down to pinch bead
+            ctx.fillStyle = '#fbd38d';
+            ctx.beginPath();
+            ctx.moveTo(-25, -22);
+            ctx.bezierCurveTo(-15, -34, -2, -38, 12, -28);
+            ctx.bezierCurveTo(18, -22, 16, -10, 8, -4);
+            ctx.bezierCurveTo(2, 0, -8, -5, -18, -10);
+            ctx.closePath();
+            ctx.fill();
+
+            // Thumb nail
+            ctx.fillStyle = '#ffedd5';
+            ctx.beginPath();
+            ctx.ellipse(12, -20, 3.5, 6, Math.PI / 4, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // 4. Index finger pinching the bead from below
+            ctx.fillStyle = '#f6ad55';
+            ctx.beginPath();
+            ctx.moveTo(-15, -6);
+            ctx.bezierCurveTo(-2, -8, 12, -8, 18, 0);
+            ctx.bezierCurveTo(22, 8, 14, 18, 4, 16);
+            ctx.bezierCurveTo(-8, 14, -18, 8, -22, 2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Finger crease lines
+            ctx.strokeStyle = '#dd6b20';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.arc(-8, 4, 6, -0.4, 0.6);
+            ctx.stroke();
+
+            // Hand outer contour
+            ctx.strokeStyle = '#c05621';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(-110, -15);
+            ctx.bezierCurveTo(-90, -21, -60, -24, -30, -22);
+            ctx.bezierCurveTo(-15, -34, -2, -38, 12, -28);
+            ctx.bezierCurveTo(18, -22, 16, -10, 8, -4);
+            ctx.bezierCurveTo(14, 2, 20, 8, 12, 16);
+            ctx.bezierCurveTo(0, 18, -18, 14, -22, 12);
+            ctx.bezierCurveTo(-48, 16, -75, 15, -110, 13);
+            ctx.stroke();
+
+            ctx.restore();
+            ctx.restore();
+        }
+
+        function drawPearlBead(ctx, px, py, radius, isHeld) {
+            ctx.save();
+            
+            // Drop shadow
+            ctx.beginPath();
+            ctx.arc(px, py + 2.5, radius * 0.95, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.fill();
+
+            // 3D Spherical Radial Gradient
+            const grad = ctx.createRadialGradient(
+                px - radius * 0.35, py - radius * 0.35, radius * 0.08,
+                px, py, radius
+            );
+            
+            if (isHeld) {
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.3, '#fef08a');
+                grad.addColorStop(0.75, '#eab308');
+                grad.addColorStop(1, '#854d0e');
+            } else {
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.25, '#f5efe6');
+                grad.addColorStop(0.65, '#c5ab93');
+                grad.addColorStop(0.9, '#8c6d53');
+                grad.addColorStop(1, '#4a3321');
+            }
+
+            ctx.beginPath();
+            ctx.arc(px, py, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Outer subtle rim
+            ctx.strokeStyle = 'rgba(68, 44, 27, 0.4)';
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawBeadScene() {
+            const W = beadCanvas.width;
+            const H = beadCanvas.height;
+            if (W <= 0 || H <= 0) return;
+
+            bCtx.clearRect(0, 0, W, H);
+
+            // Classic borders for textbook feel
+            if (!beadThemeDark) {
+                bCtx.fillStyle = '#859163';
+                bCtx.fillRect(0, 0, W, 8);
+                bCtx.fillRect(0, H - 8, W, 8);
+                bCtx.strokeStyle = '#556338';
+                bCtx.lineWidth = 1;
+                bCtx.strokeRect(0, 8, W, H - 16);
+            }
+
+            const centerY = H / 2;
+
+            // Equilibrium Center Line (Dashed)
+            bCtx.beginPath();
+            bCtx.strokeStyle = beadThemeDark ? 'rgba(71, 85, 105, 0.5)' : 'rgba(120, 130, 95, 0.4)';
+            bCtx.lineWidth = 1.5;
+            bCtx.setLineDash([6, 6]);
+            bCtx.moveTo(20, centerY);
+            bCtx.lineTo(W - 20, centerY);
+            bCtx.stroke();
+            bCtx.setLineDash([]);
+
+            // Amplitude boundary lines (subtle guide)
+            bCtx.beginPath();
+            bCtx.strokeStyle = beadThemeDark ? 'rgba(56, 189, 248, 0.15)' : 'rgba(163, 175, 130, 0.35)';
+            bCtx.setLineDash([3, 4]);
+            bCtx.moveTo(40, centerY - beadAmp);
+            bCtx.lineTo(W - 40, centerY - beadAmp);
+            bCtx.moveTo(40, centerY + beadAmp);
+            bCtx.lineTo(W - 40, centerY + beadAmp);
+            bCtx.stroke();
+            bCtx.setLineDash([]);
+
+            // Compute bead positions
+            const beadRadius = 6.5;
+            const isLeft = (handSide === 'left');
+            const startX = isLeft ? 120 : W - 120;
+            const endX = isLeft ? W - 30 : 30;
+            const totalSpan = Math.abs(endX - startX);
+
+            let beads = [];
+            for (let i = 0; i < NUM_BEADS; i++) {
+                const distFromHand = i * (totalSpan / (NUM_BEADS - 1));
+                const bx = isLeft ? (startX + distFromHand) : (startX - distFromHand);
+                const delayTime = distFromHand / beadWaveSpeed;
+                const pastY = getHandYAtTime(beadSimTime - delayTime);
+                const by = centerY - pastY; // positive Y is UP
+                beads.push({ x: bx, y: by, isHandBead: (i === 0) });
+            }
+
+            // Draw connecting string line behind beads
+            bCtx.beginPath();
+            bCtx.strokeStyle = beadThemeDark ? 'rgba(148, 163, 184, 0.3)' : 'rgba(100, 90, 70, 0.35)';
+            bCtx.lineWidth = 2;
+            for (let i = 0; i < NUM_BEADS; i++) {
+                if (i === 0) bCtx.moveTo(beads[i].x, beads[i].y);
+                else bCtx.lineTo(beads[i].x, beads[i].y);
+            }
+            bCtx.stroke();
+
+            // Draw Beads
+            for (let i = 0; i < NUM_BEADS; i++) {
+                drawPearlBead(bCtx, beads[i].x, beads[i].y, beadRadius, beads[i].isHandBead);
+            }
+
+            // Draw the Hand pinching the first bead
+            const handAnchor = beads[0];
+            drawHand(bCtx, handAnchor.x, handAnchor.y, !isLeft);
+        }
+
+        // ========================================================
+        // MASTER ANIMATION LOOP
+        // ========================================================
+        function masterAnimate(now) {
+            const dt = Math.min(0.06, (now - lastFrameTime) / 1000);
+            lastFrameTime = now;
+
+            // Animate Oscilloscope View
+            if (currentTab === 'oscilloscope') {
+                if (isPlaying) {
+                    time += dt;
+                    draw();
+                }
+            }
+
+            // Animate Bead Wave View
+            if (currentTab === 'beadwave') {
+                updateBeadPhysics(dt);
+                drawBeadScene();
+            }
+
+            // Status light blink
             if(Math.floor(now / 500) % 2 === 0) {
                 document.getElementById('sysTime').style.opacity = '1';
             } else {
                 document.getElementById('sysTime').style.opacity = '0.4';
             }
 
-            requestAnimationFrame(animate);
+            requestAnimationFrame(masterAnimate);
         }
 
-        // Start initialization
+        // Initialize Everything
         syncAppHeight();
         updateUI();
-        requestAnimationFrame(animate);
+        resetBeadSimulation();
+        requestAnimationFrame(masterAnimate);
     </script>
 </body>
 </html>
